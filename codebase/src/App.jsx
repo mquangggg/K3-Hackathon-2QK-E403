@@ -224,7 +224,7 @@ function App() {
       return;
     }
 
-    const countToGenerate = overrideCount || numQuestions;
+    const countToGenerate = typeof overrideCount === 'number' ? overrideCount : numQuestions;
     setQuizState('loading');
     setStatusMessage(`🤖 AI đang phân tích toàn bộ ${slides.length} slide PDF để sinh ${countToGenerate} câu Quiz...`);
 
@@ -544,7 +544,7 @@ function App() {
 
                     <button 
                       className="btn-generate-quiz" 
-                      onClick={handleGenerateFullPdfQuiz}
+                      onClick={() => handleGenerateFullPdfQuiz()}
                     >
                       🤖 Sinh {numQuestions} Câu Quiz Từ Toàn Bộ PDF
                     </button>
