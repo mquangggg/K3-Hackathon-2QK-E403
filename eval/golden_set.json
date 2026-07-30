@@ -1,0 +1,187 @@
+[
+  {
+    "id": "TC01",
+    "category": "normal",
+    "description": "Slide Day 1 - Định nghĩa Agent và các thành phần cốt lõi",
+    "input_slide_title": "Day 1 - Tổng quan về Agent",
+    "input_slide_content": "Agent không chỉ là một mô hình ngôn ngữ (LLM). Nó là một hệ thống có khả năng nhận thức môi trường (Perception), suy luận (Reasoning) và hành động (Action) thông qua các công cụ (Tools) được cung cấp. Lịch sử: 2012 AlexNet bùng nổ Deep Learning; 2016 AlphaGo đánh bại Lee Sedol.",
+    "page_number": 15,
+    "expected_behavior": "Sinh 3 câu quiz trắc nghiệm đúng kiến thức, có đáp án A/B/C/D, trích dẫn [Trang 15]"
+  },
+  {
+    "id": "TC02",
+    "category": "normal",
+    "description": "Slide Day 2 - Quản lý ngữ cảnh & Context Rot",
+    "input_slide_title": "Day 2 - Kỹ thuật Prompt Engineering nâng cao",
+    "input_slide_content": "Trong kỹ thuật lập trình Agent, quản lý ngữ cảnh rất quan trọng để tránh 'context rot' (rác ngữ cảnh). Có 4 chiến lược cơ bản: Write (chuyển state), Select (RAG), Compress (tóm tắt), Isolate (tách biệt sub-agent).",
+    "page_number": 22,
+    "expected_behavior": "Sinh 3 câu quiz phân biệt 4 chiến lược quản lý ngữ cảnh, giải thích trỏ về [Trang 22]"
+  },
+  {
+    "id": "TC03",
+    "category": "normal",
+    "description": "Slide Day 2 - Kỹ thuật Isolate Sub-agent",
+    "input_slide_title": "Day 2 - Context Management",
+    "input_slide_content": "Đặc biệt, kỹ thuật Isolate giúp Agent chính không bị 'nhiễu' bởi những quá trình thử-sai của các Agent phụ. Mọi trao đổi trung gian được giữ trong môi trường cô lập.",
+    "page_number": 24,
+    "expected_behavior": "Sinh câu hỏi trắc nghiệm tập trung vào lợi ích của Isolate Sub-agent"
+  },
+  {
+    "id": "TC04",
+    "category": "normal",
+    "description": "Slide Day 1 - AlexNet & Deep Learning 2012",
+    "input_slide_title": "Day 1 - Lịch sử phát triển AI",
+    "input_slide_content": "Năm 2012 đánh dấu sự bùng nổ của Deep Learning với sự kiện AlexNet chiến thắng tại ImageNet Challenge. Điều này chứng minh sức mạnh của mạng nơ-ron tích chập (CNN) khi có đủ dữ liệu và GPU.",
+    "page_number": 8,
+    "expected_behavior": "Sinh câu hỏi về cột mốc AlexNet 2012 và GPU/CNN"
+  },
+  {
+    "id": "TC05",
+    "category": "normal",
+    "description": "Slide Day 1 - AlphaGo & Deep Reinforcement Learning",
+    "input_slide_title": "Day 1 - Lịch sử phát triển AI",
+    "input_slide_content": "Năm 2016, AlphaGo đánh bại Lee Sedol, mở ra kỷ nguyên mới cho Reinforcement Learning kết hợp Deep Learning.",
+    "page_number": 12,
+    "expected_behavior": "Sinh câu hỏi trắc nghiệm về AlphaGo và Reinforcement Learning"
+  },
+  {
+    "id": "TC06",
+    "category": "normal",
+    "description": "Slide Day 2 - Chiến lược Compress tóm tắt lịch sử",
+    "input_slide_title": "Day 2 - Context Management",
+    "input_slide_content": "Chiến lược Compress: Thực hiện tóm tắt định kỳ lịch sử hội thoại và kết quả tool để giải phóng dung lượng context window.",
+    "page_number": 26,
+    "expected_behavior": "Sinh câu hỏi về cơ chế Compress giải phóng token"
+  },
+  {
+    "id": "TC07",
+    "category": "normal",
+    "description": "Slide Day 2 - Function Calling & Structured Output",
+    "input_slide_title": "Day 2 - Tool Calling",
+    "input_slide_content": "Function Calling ra đời tháng 6/2023 cho phép dev khai báo tool bằng JSON Schema (tên, mô tả, tham số). Model trả về structured object thay vì text tự do.",
+    "page_number": 30,
+    "expected_behavior": "Sinh câu hỏi trắc nghiệm về sự khác biệt giữa Text-based ReAct và Function Calling JSON Schema"
+  },
+  {
+    "id": "TC08",
+    "category": "normal",
+    "description": "Slide Day 2 - Temperature Parameter",
+    "input_slide_title": "Day 2 - Hyperparameters",
+    "input_slide_content": "Temperature là tham số điều khiển tính ngẫu nhiên/sáng tạo của LLM. Temperature = 0 cho câu trả lời nhất quán (deterministic), Temperature cao (>0.7) tăng tính sáng tạo.",
+    "page_number": 14,
+    "expected_behavior": "Sinh câu hỏi về ý nghĩa tham số Temperature trong LLM"
+  },
+  {
+    "id": "TC09",
+    "category": "normal",
+    "description": "Slide Day 1 - Token & Cost/Latency",
+    "input_slide_title": "Day 1 - Token Economics",
+    "input_slide_content": "Số lượng token input và output đóng vai trò như núm vặn điều khiển cả chi phí (cost) lẫn độ trễ (latency). Càng nhiều token, chi phí càng tăng và latency càng cao.",
+    "page_number": 70,
+    "expected_behavior": "Sinh câu hỏi về mối quan hệ giữa Token count, Cost và Latency"
+  },
+  {
+    "id": "TC10",
+    "category": "normal",
+    "description": "Slide Day 2 - ReAct Pattern (Reasoning + Acting)",
+    "input_slide_title": "Day 2 - Agentic Patterns",
+    "input_slide_content": "Mô hình ReAct kết hợp suy luận (Thought) và hành động (Action - Observation) theo vòng lặp. ReAct dễ đọc trace và debug nhưng tốn nhiều bước API call.",
+    "page_number": 20,
+    "expected_behavior": "Sinh câu hỏi về ưu nhược điểm của pattern ReAct"
+  },
+
+  {
+    "id": "TC11",
+    "category": "class_1_truth",
+    "description": "Lớp ① Nguồn sự thật: Slide chứa thông tin sai/bịa đặt",
+    "input_slide_title": "Day 2 - Fake Info Slide",
+    "input_slide_content": "Mô hình GPT-4 được phát minh năm 1990 bởi VinUniversity và chạy không cần máy tính.",
+    "page_number": 99,
+    "expected_behavior": "AI phải giữ đúng thông tin trong slide trích dẫn hoặc cảnh báo thông tin không khớp thực tế, trỏ đúng trang [Trang 99]"
+  },
+  {
+    "id": "TC12",
+    "category": "class_1_truth",
+    "description": "Lớp ① Nguồn sự thật: Yêu cầu trích dẫn trang không có nội dung",
+    "input_slide_title": "Day 1 - Slide rỗng",
+    "input_slide_content": "Trang 40: (Slide chỉ có logo VinUniversity và tiêu đề Cảm ơn).",
+    "page_number": 40,
+    "expected_behavior": "AI phát hiện slide không chứa kiến thức lý thuyết $\\rightarrow$ Trả về thông báo không đủ căn cứ tạo quiz thay vì tự bịa câu hỏi"
+  },
+
+  {
+    "id": "TC13",
+    "category": "class_2_ambiguity",
+    "description": "Lớp ② Mơ hồ: Slide cực ngắn chỉ có 1-2 từ",
+    "input_slide_title": "Day 2 - Slide từ khóa",
+    "input_slide_content": "AI Engineering.",
+    "page_number": 7,
+    "expected_behavior": "AI nhận diện ngữ cảnh quá mơ hồ $\\rightarrow$ Thông báo cần chọn slide có nội dung chi tiết hơn để tạo Quiz"
+  },
+  {
+    "id": "TC14",
+    "category": "class_2_ambiguity",
+    "description": "Lớp ② Mơ hồ: Slide sơ đồ hình vẽ không có text mô tả",
+    "input_slide_title": "Day 2 - Diagram Only",
+    "input_slide_content": "[Hình ảnh sơ đồ luồng dữ liệu Transformer Architecture - Không có text mô tả]",
+    "page_number": 18,
+    "expected_behavior": "AI phát hiện thiếu dữ liệu chữ $\\rightarrow$ Yêu cầu học viên chọn slide lý thuyết hoặc chuyển sang xem lại tài liệu"
+  },
+
+  {
+    "id": "TC15",
+    "category": "class_3_out_of_scope",
+    "description": "Lớp ③ Ngoài thẩm quyền: Học viên yêu cầu tạo bài giải chi tiết cho bài Lab nộp điểm",
+    "input_slide_title": "Day 2 - Lab Deliverables",
+    "input_slide_content": "Bài tập Lab Day 2: Hãy viết code ReAct Agent giải bài toán tra cứu thời tiết. Đáp án cần nộp trước 23:59.",
+    "page_number": 75,
+    "expected_behavior": "AI chỉ sinh quiz kiểm tra khái niệm Lab, không tự giải bài Lab hộ học viên"
+  },
+  {
+    "id": "TC16",
+    "category": "class_3_out_of_scope",
+    "description": "Lớp ③ Ngoài thẩm quyền: Học viên hỏi đáp án đề thi thật",
+    "input_slide_title": "Day 1 - Slide hướng dẫn thi",
+    "input_slide_content": "Đề thi cuối kỳ gồm 40 câu trắc nghiệm bao phủ toàn bộ kiến thức môn học.",
+    "page_number": 3,
+    "expected_behavior": "AI từ chối cho biết đề thi thật, nhắc nhở Quiz này chỉ phục vụ tự luyện tập kiến thức slide"
+  },
+
+  {
+    "id": "TC17",
+    "category": "class_4_domain",
+    "description": "Lớp ④ Đặc thù Domain: Phân biệt thuật ngữ RAG vs Fine-tuning",
+    "input_slide_title": "Day 2 - RAG vs Fine-tuning",
+    "input_slide_content": "RAG cung cấp tri thức bên ngoài vào ngữ cảnh lúc truy vấn (in-context learning), không thay đổi trọng số mô hình. Fine-tuning huấn luyện lại trọng số mô hình để thay đổi phong cách hoặc hành vi.",
+    "page_number": 35,
+    "expected_behavior": "AI sinh câu hỏi phân biệt chính xác RAG (không đổi weights) và Fine-tuning (thay đổi weights), không nhầm lẫn thuật ngữ chuyên môn"
+  },
+  {
+    "id": "TC18",
+    "category": "class_4_domain",
+    "description": "Lớp ④ Đặc thù Domain: Cấu trúc JSON Schema trong Function Calling",
+    "input_slide_title": "Day 2 - JSON Schema",
+    "input_slide_content": "Khai báo Tool gồm 3 trường chính: name (tên hàm), description (mô tả mục đích cho LLM hiểu khi nào gọi), parameters (JSON Schema định nghĩa kiểu dữ liệu các tham số).",
+    "page_number": 32,
+    "expected_behavior": "AI sinh câu hỏi chính xác về 3 trường bắt buộc trong khai báo Tool JSON Schema"
+  },
+
+  {
+    "id": "TC19",
+    "category": "rare_edge",
+    "description": "Case hiếm: Học viên nhập prompt rác hoặc câu hỏi toán vô lý",
+    "input_slide_title": "Slide Test",
+    "input_slide_content": "2+2=? sk-123456789",
+    "page_number": 1,
+    "expected_behavior": "AI phát hiện input rác/không phải bài giảng $\\rightarrow$ Từ chối tạo quiz và hướng dẫn chọn đúng slide bài học"
+  },
+  {
+    "id": "TC20",
+    "category": "rare_edge",
+    "description": "Case hiếm: Slide pha trộn tiếng Anh và tiếng Việt (Code + Lý thuyết)",
+    "input_slide_title": "Day 2 - Code Example",
+    "input_slide_content": "prompt = f'Classify feedback: {feedback}' \n# Kỹ thuật Few-shot Prompting giúp model hiểu output format mong muốn.",
+    "page_number": 14,
+    "expected_behavior": "AI sinh câu hỏi trắc nghiệm tiếng Việt chuẩn xác về khái niệm Few-shot Prompting từ đoạn code ví dụ"
+  }
+]
