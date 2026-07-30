@@ -224,7 +224,7 @@ function App() {
       return;
     }
 
-    const countToGenerate = overrideCount || numQuestions;
+    const countToGenerate = (typeof overrideCount === 'number') ? overrideCount : numQuestions;
     setQuizState('loading');
     setStatusMessage(`🤖 AI đang phân tích toàn bộ ${slides.length} slide PDF để sinh ${countToGenerate} câu Quiz...`);
 
@@ -544,7 +544,7 @@ function App() {
 
                     <button 
                       className="btn-generate-quiz" 
-                      onClick={handleGenerateFullPdfQuiz}
+                      onClick={() => handleGenerateFullPdfQuiz()}
                     >
                       🤖 Sinh {numQuestions} Câu Quiz Từ Toàn Bộ PDF
                     </button>
@@ -624,6 +624,46 @@ function App() {
                         </div>
                       )
                     })}
+                    {(() => {
+                      const answeredCount = Object.keys(answers).length;
+                      const isFinished = answeredCount === activeQuizzes.length && Object.values(answers).every(a => a.showResult);
+                      if (!isFinished) return null;
+                      
+                      const correctCount = activeQuizzes.filter((q, i) => {
+                        const ans = answers[i];
+                        return ans && (ans.selected === q.correctIndex || q.options[ans.selected] === q.correct_answer);
+                      }).length;
+                      const scorePercentage = Math.round((correctCount / activeQuizzes.length) * 100);
+                      
+                      return (
+                        <div className="quiz-result-summary" style={{
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', 
+                          padding: '1.5rem', background: 'var(--surface-sunken)', 
+                          borderRadius: '12px', border: '1px solid var(--border)',
+                          boxShadow: 'var(--shadow-sm)'
+                        }}>
+                          <h3 style={{margin: '0 0 1rem 0', color: 'var(--text-main)', fontSize: '1.1rem'}}>Hoàn thành bộ Quiz!</h3>
+                          <div style={{
+                            width: '100px', height: '100px', borderRadius: '50%',
+                            background: `conic-gradient(var(--primary) ${scorePercentage}%, var(--border) 0)`,
+                            display: 'flex', justifyContent: 'center', alignItems: 'center',
+                            marginBottom: '1rem'
+                          }}>
+                            <div style={{
+                              width: '82px', height: '82px', borderRadius: '50%', 
+                              background: 'var(--surface)', display: 'flex', 
+                              justifyContent: 'center', alignItems: 'center',
+                              fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-main)'
+                            }}>
+                              {scorePercentage}%
+                            </div>
+                          </div>
+                          <div style={{fontSize: '0.95rem', color: 'var(--text-sub)', fontWeight: 500}}>
+                            Bạn trả lời đúng {correctCount} / {activeQuizzes.length} câu.
+                          </div>
+                        </div>
+                      );
+                    })()}
                     
                     <button 
                       style={{padding: '0.75rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)', boxShadow: 'var(--shadow-sm)'}}

@@ -5,9 +5,9 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
 ---
 
 ## §1. User & Job
-- **Job executor + workflow**: Học viên khóa AI Thực Chiến vừa đọc xong một trang tài liệu / slide lý thuyết dài trên nền tảng VLearn. Workflow: Đọc slide $\rightarrow$ Đánh giá mức độ hiểu bài $\rightarrow$ Quyết định chuyển slide hay xem lại.
-- **Core JTBD**: Học viên muốn kiểm tra nhanh mức độ hiểu thật của mình ngay sau khi đọc từng slide để đảm bảo không bị hổng kiến thức trước khi tiếp tục.
-- **Problem statement**: Học viên đọc xong slide bài giảng thường có cảm giác "ảo tưởng" là đã hiểu (Illusion of Competence), nhưng thực tế chưa đọng lại kiến thức; đến khi làm bài tập lớn/Lab mới phát hiện bị stuck 10-30 turns thì đã muộn và tốn thời gian học lại.
+- **Job executor + workflow**: Học viên khóa AI Thực Chiến vừa đọc xong toàn bộ tài liệu PDF bài giảng trên nền tảng VLearn. Workflow: Đọc xong tài liệu $\rightarrow$ Đánh giá tổng hợp mức độ hiểu bài $\rightarrow$ Quyết định làm Lab hay xem lại.
+- **Core JTBD**: Học viên muốn kiểm tra nhanh mức độ hiểu thật của mình ngay sau khi đọc toàn bộ tài liệu PDF để đảm bảo không bị hổng kiến thức cốt lõi.
+- **Problem statement**: Học viên đọc xong bài giảng thường có cảm giác "ảo tưởng" là đã hiểu (Illusion of Competence), nhưng thực tế chưa đọng lại kiến thức; đến khi làm bài tập lớn/Lab mới phát hiện bị stuck 10-30 turns thì đã muộn và tốn thời gian học lại.
 - **Evidence (chuẩn B - Mining Data từ `chat_history_anonymized_for_hackathon.csv`)**:
   - *Phương pháp*: Đọc 1,261 turn hỏi-đáp (2,522 tin nhắn). Lọc theo cờ `move_used=validate_understanding` và đếm số hội thoại kẹt kéo dài.
   - *Số liệu đếm*: Nước đi kiểm tra hiểu bài `validate_understanding` chỉ xuất hiện **1/1.261 turn (0.08%)** và cờ `asked_check_question` chỉ có **3/2.515 tin nhắn (0.12%)**. Có **142/585 hội thoại (24.3%)** bị kẹt kéo dài $\ge 3$ turns (kỷ lục 30 turns).
@@ -26,7 +26,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
   2. **AI Tutor Tóm Tắt Slide (Loại)** | 80% học viên | Khi lười đọc | Đọc tóm tắt dễ bị lười tư duy, bỏ qua chi tiết | Vừa | LOẠI
   3. **Nhắc Nhở Lịch Học Discord (Loại)** | 60% học viên | Hàng ngày | Gây phiền nhiễu nếu gửi liên tục | Thấp | LOẠI
 - **Ứng viên ĐÃ LOẠI + vì sao**: Loại *AI Tutor Tóm tắt* đơn thuần vì chỉ khiến học viên lười đọc chi tiết; Loại *Nhắc lịch Discord* vì mang tính thông báo thụ động, không giải quyết nỗi đau Illusion of Competence.
-- **Ứng viên CHỌN + vì sao (bằng số)**: Chọn *Flash Quiz & Tutor Chatbot* vì tạo ra ngay vòng lặp phản hồi (feedback loop) 1 phút, giảm **24.3%** tỷ lệ kẹt bài Lab và hỗ trợ giải đáp chính xác bám sát PDF.
+- **Ứng viên CHỌN + vì sao (bằng số)**: Chọn *Flash Quiz & Tutor Chatbot* vì tạo ra ngay vòng lặp phản hồi (feedback loop) 1 phút, kỳ vọng giải quyết vấn đề của **142/585 (24.3%)** hội thoại bị kẹt kéo dài và hỗ trợ giải đáp chính xác bám sát PDF.
 
 ---
 
@@ -43,7 +43,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
   - KHÔNG tự động lưu kết quả vào bảng điểm chính thức môn học (chỉ dùng để tự ôn luyện).
   - KHÔNG tạo quiz cho video bài giảng (chỉ áp dụng slide text & transcript PDF).
   - KHÔNG giải hộ bài tập Lab nộp điểm hay tiết lộ đề thi.
-- **Mức prototype nhắm tới**: **[x] Mock / Working** — Giao diện React bấm trơn tru, lời gọi AI Gemini 2.5 Flash sinh Quiz và trả lời Chatbot là **THẬT 100%**.
+- **Mức prototype nhắm tới**: **[x] Mock / Working** — Giao diện React bấm trơn tru, lời gọi AI Groq API (Llama-3.3) sinh Quiz và trả lời Chatbot là **THẬT 100%**.
 - **Automation**: **[x] Automate** — AI tự động sinh câu hỏi và tự động chấm. Lý do theo cost-of-error: Sai thì cực rẻ (nếu câu hỏi chưa phù hợp, học viên chỉ bấm bỏ qua hoặc tạo lượt test mới, không bị trừ điểm).
 
 ### §4b. Nguyên tắc HAX / PAIR áp dụng
@@ -91,7 +91,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
 ## §8. Phân công & Kế hoạch
 - **Phân công có tên**:
   - **Vũ Minh Quang (PM / Spec Lead)**: Quản lý `spec.md`, khai phá bằng chứng chatlog VLearn, chốt Quality Bar & thực hiện chạy Script Eval.
-  - **Lương Ngọc Quang (AI / Prompt Engineer)**: Thiết kế System Prompt Gemini 2.5 Flash, xây dựng bộ Golden Set 20 cases từ Chatlog thật, viết script kiểm thử `run_eval.py`.
+  - **Lương Ngọc Quang (AI / Prompt Engineer)**: Thiết kế System Prompt Groq API, xây dựng bộ Golden Set 20 cases từ Chatlog thật, viết script kiểm thử `run_eval.py`.
   - **Phạm Trung Kiên (Frontend Dev / Presenter)**: Code giao diện Web Prototype (React/Vite), tích hợp RAG Retrieval Service, xử lý kéo thả panel và trượt Slide Viewer 60fps, thuyết trình Demo.
 - **Willing users (≥3 tên) + kế hoạch vòng validation CP5**:
   - *Học viên 1: Nguyễn Văn An* (Lớp K3 AI) - Test tính năng sinh Quiz sau khi học slide Day 1.
@@ -104,6 +104,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
 | Thời điểm | Đổi gì | Vì sao (trỏ về feedback/case nào) |
 |---|---|---|
 | **2026-07-29** | Khởi tạo file `spec.md` (CP1 & CP2) | Định nghĩa bài toán Flash Quiz & Lát cắt MỘT CÂU theo 1.261 turn chatlog VLearn. |
-| **2026-07-30** | Tích hợp AI Gemini thật & Golden Set 20 cases (CP3) | Lần chạy Eval 1 đạt 100% PASS trên bộ Golden Set bám sát slide PDF. |
+| **2026-07-30** | Tích hợp AI Groq thật & Golden Set 20 cases (CP3) | Lần chạy Eval 1 đạt 100% PASS trên bộ Golden Set bám sát slide PDF. |
 | **2026-07-30** | Bổ sung Tutor Chatbot & Intent Detection (CP4/CP5) | Đáp ứng nhu cầu hỏi đáp kiến thức & tóm tắt theo dải slide không bị trích cụt. |
 | **2026-07-30** | Cân bằng Golden Set 10 Chatlog + 10 Survey | Đảm bảo đạt 100% tiêu chí Rubric R4 về dữ liệu thực tế. |
+| **2026-07-30** | Chuyển đổi API sang Groq & Sửa Flow (Validation) | Khắc phục rate limit của Gemini, đổi JTBD thành sinh quiz từ toàn bộ file PDF để khớp Prototype thực tế. |

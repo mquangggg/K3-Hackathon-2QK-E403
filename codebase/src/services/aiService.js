@@ -2,7 +2,7 @@
  * Service gọi Google Gemini API chính thức cho AI Quiz Generator & AI Tutor Chatbot
  */
 
-export const DEFAULT_GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || "gemini-2.5-flash";
+export const DEFAULT_GROQ_MODEL = import.meta.env.VITE_GROQ_MODEL || "llama-3.3-70b-versatile";
 
 export const SYSTEM_PROMPT = `
 Bạn là "VLearn AI Quiz Generator" - Trợ lý trí tuệ nhân tạo chuyên tạo các câu hỏi trắc nghiệm kiểm tra hiểu bài (Active Understanding Check) dựa trên tài liệu bài giảng PDF.
@@ -82,11 +82,11 @@ OUTPUT FORMAT MUST BE VALID JSON ONLY:
  * Sinh Quiz từ toàn bộ mảng Slide PDF
  */
 export async function generateQuizFromFullPdf({ slides = [], numQuestions = 5, apiKey = "", model = "" }) {
-  const GEMINI_KEY = apiKey || import.meta.env.VITE_GEMINI_API_KEY || "";
-  const GEMINI_MODEL = model || import.meta.env.VITE_GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
+  const GROQ_KEY = apiKey || import.meta.env.VITE_GROQ_API_KEY || "";
+  const GROQ_MODEL = model || import.meta.env.VITE_GROQ_MODEL || DEFAULT_GROQ_MODEL;
 
-  if (!GEMINI_KEY) {
-    throw new Error("Chưa cấu hình GEMINI_API_KEY trong file .env!");
+  if (!GROQ_KEY) {
+    throw new Error("Chưa cấu hình GROQ_API_KEY trong file .env!");
   }
 
   if (!slides || slides.length === 0) {
@@ -111,43 +111,40 @@ Hãy phân tích tài liệu trên và sinh ĐÚNG ${numQuestions} câu hỏi tr
 `;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
-    
+    const url = "https://api.groq.com/openai/v1/chat/completions";
+
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_KEY}`
+      },
       body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: SYSTEM_PROMPT },
-              { text: userPrompt }
-            ]
-          }
+        model: GROQ_MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userPrompt }
         ],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.2
-        }
+        response_format: { type: "json_object" },
+        temperature: 0.2
       })
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`Gemini API Error (${response.status}): ${errText}`);
+      throw new Error(`Groq API Error (${response.status}): ${errText}`);
     }
 
     const data = await response.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
+    const rawText = data.choices?.[0]?.message?.content;
+
     if (!rawText) {
-      throw new Error("Không nhận được dữ liệu từ Gemini API.");
+      throw new Error("Không nhận được dữ liệu từ Groq API.");
     }
 
     return JSON.parse(rawText);
   } catch (error) {
-    console.error(`Lỗi Gemini API (Model: ${GEMINI_MODEL}):`, error);
+    console.error(`Lỗi Groq API (Model: ${GROQ_MODEL}):`, error);
     throw error;
   }
 }
@@ -156,11 +153,11 @@ Hãy phân tích tài liệu trên và sinh ĐÚNG ${numQuestions} câu hỏi tr
  * Gọi AI Tutor Chatbot trả lời câu hỏi (QA) hoặc Tóm tắt bài giảng (SUMMARY)
  */
 export async function askTutorChatbot({ question = "", intent = "QA", history = [], retrievedChunks = [], apiKey = "", model = "" }) {
-  const GEMINI_KEY = apiKey || import.meta.env.VITE_GEMINI_API_KEY || "";
-  const GEMINI_MODEL = model || import.meta.env.VITE_GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
+  const GROQ_KEY = apiKey || import.meta.env.VITE_GROQ_API_KEY || "";
+  const GROQ_MODEL = model || import.meta.env.VITE_GROQ_MODEL || DEFAULT_GROQ_MODEL;
 
-  if (!GEMINI_KEY) {
-    throw new Error("Chưa cấu hình GEMINI_API_KEY trong file .env!");
+  if (!GROQ_KEY) {
+    throw new Error("Chưa cấu hình GROQ_API_KEY trong file .env!");
   }
 
   if (!retrievedChunks || retrievedChunks.length === 0) {
@@ -223,38 +220,35 @@ Nếu Context trên không chứa thông tin trả lời, phải trả về stat
 `;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
-    
+    const url = "https://api.groq.com/openai/v1/chat/completions";
+
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_KEY}`
+      },
       body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: systemInstruction },
-              { text: userPrompt }
-            ]
-          }
+        model: GROQ_MODEL,
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user", content: userPrompt }
         ],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: intent === 'SUMMARY' ? 0.2 : 0.1
-        }
+        response_format: { type: "json_object" },
+        temperature: intent === 'SUMMARY' ? 0.2 : 0.1
       })
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      throw new Error(`Gemini API Error (${response.status}): ${errText}`);
+      throw new Error(`Groq API Error (${response.status}): ${errText}`);
     }
 
     const data = await response.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    
+    const rawText = data.choices?.[0]?.message?.content;
+
     if (!rawText) {
-      throw new Error("Không nhận được phản hồi từ Gemini API.");
+      throw new Error("Không nhận được phản hồi từ Groq API.");
     }
 
     const parsedJSON = JSON.parse(rawText);
@@ -269,7 +263,7 @@ Nếu Context trên không chứa thông tin trả lời, phải trả về stat
     return parsedJSON;
 
   } catch (error) {
-    console.error(`Lỗi AI Tutor Chatbot (${intent}) (Model: ${GEMINI_MODEL}):`, error);
+    console.error(`Lỗi AI Tutor Chatbot (${intent}) (Model: ${GROQ_MODEL}):`, error);
     throw error;
   }
 }
