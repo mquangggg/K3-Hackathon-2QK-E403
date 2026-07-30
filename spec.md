@@ -96,7 +96,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
 - **Willing users (≥3 tên) + kế hoạch vòng validation CP5**:
   - *Học viên 1: Nguyễn Văn An* (Lớp K3 AI) - Test tính năng sinh Quiz sau khi học slide Day 1.
   - *Học viên 2: Trần Thị Bích* (Lớp K3 AI) - Test tính năng Tutor Chatbot tóm tắt theo dải slide.
-  - *Học viên 3: Lê Hoàng Nam* (Lớp K3 AI) - Test khả năng từ chối giải hộ bài Lab.
+  - *Học viên 3: Lê Hoàng Nam* (Lớp K3 AI) - Test khả năng từ chối trả lời câu hỏi không liên quan.
 
 ---
 
