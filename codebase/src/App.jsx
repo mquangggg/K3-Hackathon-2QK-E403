@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { generateQuizFromAI } from './services/aiService';
+import { generateQuizFromFullPdf, askTutorChatbot } from './services/aiService';
 import { loadPdfFromUrl } from './services/pdfService';
+import { retrieveRelevantSlides } from './services/ragService';
 import { vlearnRealCourseData as courseData } from './data/vlearnData';
 import SlideThumbnailList from './components/SlideThumbnailList';
 import MainSlideViewer from './components/MainSlideViewer';
@@ -15,29 +16,32 @@ function App() {
   const [isLoadingPdf, setIsLoadingPdf] = useState(true);
   const [pdfProgress, setPdfProgress] = useState(0);
 
-  const [activeRightTab, setActiveRightTab] = useState('quiz'); // 'quiz' | 'chat'
+  const [activeRightTab, setActiveRightTab] = useState('chat'); // 'chat' | 'quiz'
 
-  // API Key state cho Gemini AI thật
-  const [apiKey, setApiKey] = useState(import.meta.env.VITE_GEMINI_API_KEY || '');
-  const [showKeyInput, setShowKeyInput] = useState(false);
+  // Dynamic Panel Resizing State
+  const [sidebarWidth, setSidebarWidth] = useState(280);
+  const [rightPanelWidth, setRightPanelWidth] = useState(380);
+  const [isResizingLeft, setIsResizingLeft] = useState(false);
+  const [isResizingRight, setIsResizingRight] = useState(false);
 
   // Quiz States
-  const [quizState, setQuizState] = useState('idle');
-  const [numQuestions, setNumQuestions] = useState(1);
+  const [quizState, setQuizState] = useState('idle'); // 'idle' | 'loading' | 'quiz'
+  const [numQuestions, setNumQuestions] = useState(5);
   const [activeQuizzes, setActiveQuizzes] = useState([]);
   const [answers, setAnswers] = useState({});
   const [statusMessage, setStatusMessage] = useState('');
   const [isRealAICall, setIsRealAICall] = useState(false);
 
-  // Chat Input State
+  // Chatbot States
   const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState([
     {
       role: 'bot',
-      text: '"nghe về AI" sang người biết cách "gọi AI" (sử dụng/tích hợp) vào công việc [trang 3].',
-      citation: 'AI IN ACTION - Day 1',
-      page: 3,
-      confidence: 85
+      text: 'Chào bạn! Mình là AI Tutor trợ lý học tập theo ngữ cảnh. Bạn có thể hỏi mình bất kỳ kiến thức nào trong các bài giảng PDF, mình sẽ trích dẫn chính xác trang slide chứng minh nhé!',
+      sources: [
+        { dayId: 'day1', dayTitle: 'Day 1', slide: 1 }
+      ]
     }
   ]);
 
@@ -65,6 +69,44 @@ function App() {
     fetchAndParsePdf('/slides/d1-slide-hackathon.pdf', 'day01_302.pdf');
   }, []);
 
+  // --- KÉO THẢ THAY ĐỔI KÍCH THƯỚC PANEL ---
+  const handleMouseDownLeft = (e) => {
+    e.preventDefault();
+    setIsResizingLeft(true);
+  };
+
+  const handleMouseDownRight = (e) => {
+    e.preventDefault();
+    setIsResizingRight(true);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (isResizingLeft) {
+        const newWidth = Math.max(180, Math.min(480, e.clientX));
+        setSidebarWidth(newWidth);
+      } else if (isResizingRight) {
+        const newWidth = Math.max(280, Math.min(680, window.innerWidth - e.clientX));
+        setRightPanelWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (isResizingLeft) setIsResizingLeft(false);
+      if (isResizingRight) setIsResizingRight(false);
+    };
+
+    if (isResizingLeft || isResizingRight) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizingLeft, isResizingRight]);
+
   // Đổi thư mục bài giảng (Day 1, Day 2...)
   const handleSelectFolder = (folderData) => {
     setActiveCourseDay(folderData);
@@ -75,70 +117,110 @@ function App() {
 
   const currentSlide = slides[activeSlideIndex] || slides[0];
 
-  // Chat Actions
-  const handleSendMessage = (e) => {
+  // --- XỬ LÝ GỬI TIN NHẮN CHATBOT VỚI RAG RETRIEVAL & GROUNDING ---
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if(!chatInput.trim()) return;
-    
-    const userPrompt = chatInput;
+    if (!chatInput.trim() || isChatLoading) return;
+
+    const userPrompt = chatInput.trim();
     setChatInput('');
+    setIsChatLoading(true);
 
-    setChatMessages(prev => [
-      ...prev,
-      { role: 'user', text: userPrompt, page: currentSlide?.originalPage || 1 }
-    ]);
+    // Thêm tin nhắn của học viên vào danh sách
+    const newHistory = [...chatMessages, { role: 'user', text: userPrompt }];
+    setChatMessages(newHistory);
 
-    setTimeout(() => {
+    try {
+      // 1. RAG Retrieval: Tìm kiếm các đoạn slide liên quan nhất từ tất cả PDF bài giảng
+      const retrievedChunks = await retrieveRelevantSlides(userPrompt, slides, courseData, 4);
+
+      // 2. Gọi Gemini API với System Prompt Grounding nghiêm ngặt
+      const result = await askTutorChatbot({
+        question: userPrompt,
+        history: chatMessages,
+        retrievedChunks
+      });
+
+      if (result && result.answer) {
+        setChatMessages(prev => [
+          ...prev,
+          {
+            role: 'bot',
+            text: result.answer,
+            sources: result.used_sources || []
+          }
+        ]);
+      } else {
+        setChatMessages(prev => [
+          ...prev,
+          {
+            role: 'bot',
+            text: "Xin lỗi, tôi không tìm thấy thông tin liên quan đến câu hỏi này trong các tài liệu học tập hiện có.",
+            sources: []
+          }
+        ]);
+      }
+    } catch (err) {
+      console.error(err);
       setChatMessages(prev => [
         ...prev,
         {
           role: 'bot',
-          text: `Dựa trên nội dung Trang ${currentSlide?.originalPage || 1} của tệp ${currentDeckTitle}, mình gợi ý bạn dùng nút "Sinh Quiz Từ Slide N" ở tab Flash Quiz nhé!`,
-          citation: currentSlide?.title || 'Slide Context',
-          page: currentSlide?.originalPage || 1,
-          confidence: 90
+          text: `❌ Lỗi tra cứu: ${err.message}`,
+          sources: []
         }
       ]);
-    }, 800);
+    }
+
+    setIsChatLoading(false);
   };
 
-  // AI Quiz Actions
-  const handleGenerateQuiz = async () => {
-    if (!currentSlide) return;
+  // --- CHUYỂN BÀI GIẢNG (DAY X) VÀ JUMP ĐẾN ĐÚNG SLIDE Y KHI CLICK CỤM NGUỒN ---
+  const handleJumpToDocumentAndSlide = async (dayId, slideNum) => {
+    if (!slideNum) return;
+
+    const targetCourse = courseData.find(c => c.id === dayId) || courseData[0];
+    
+    // Nếu nguồn thuộc bài giảng khác với bài giảng đang mở
+    if (targetCourse.id !== activeCourseDay.id) {
+      setActiveCourseDay(targetCourse);
+      await fetchAndParsePdf(targetCourse.pdfUrl, targetCourse.fileName);
+    }
+
+    const finalIndex = Math.max(0, Math.min(slides.length - 1, Number(slideNum) - 1));
+    setActiveSlideIndex(finalIndex);
+    setStatusMessage(`📍 Đã chuyển đến ${targetCourse.title.split('—')[0]} - Slide ${slideNum}!`);
+  };
+
+  // --- KÍCH HOẠT AI SINH QUIZ TỪ TOÀN BỘ SLIDE PDF ---
+  const handleGenerateFullPdfQuiz = async () => {
+    if (!slides || slides.length === 0) {
+      setStatusMessage("⚠️ Chưa có dữ liệu Slide PDF. Vui lòng đợi nạp tài liệu xong.");
+      return;
+    }
 
     setQuizState('loading');
-    setStatusMessage(`AI đang đọc Trang ${currentSlide.originalPage} để sinh Quiz...`);
-
-    const slideTitle = currentSlide.title;
-    const slideContent = currentSlide.contentText;
-    const pageNumber = currentSlide.originalPage || (activeSlideIndex + 1);
+    setStatusMessage(`🤖 AI đang phân tích toàn bộ ${slides.length} slide PDF để sinh ${numQuestions} câu Quiz...`);
 
     try {
-      const result = await generateQuizFromAI({
-        slideTitle,
-        slideContent,
-        pageNumber,
-        numQuestions,
-        apiKey
+      const result = await generateQuizFromFullPdf({
+        slides,
+        numQuestions
       });
 
-      if (result && result.status === 'SUCCESS' && result.quizzes?.length > 0) {
+      if (result && result.quizzes && result.quizzes.length > 0) {
         setActiveQuizzes(result.quizzes);
         setQuizState('quiz');
         setIsRealAICall(true);
-        setStatusMessage(`✨ Gemini AI thật đã sinh Quiz thành công cho Trang ${pageNumber}!`);
-      } else if (result.status === 'INSUFFICIENT_DATA') {
-        setQuizState('idle');
-        setStatusMessage(`⚠️ [Guardrail Trang ${pageNumber}]: ${result.message}`);
+        setStatusMessage(`✨ Gemini AI thật đã sinh thành công ${result.quizzes.length} câu Quiz từ toàn bộ tài liệu PDF!`);
       } else {
-        setQuizState('quiz');
-        setIsRealAICall(true);
-        setStatusMessage(`Đã sinh Quiz thành công từ trang PDF gốc ${pageNumber}.`);
+        setQuizState('idle');
+        setStatusMessage(`⚠️ AI không sinh được bộ Quiz phù hợp từ tài liệu.`);
       }
     } catch (err) {
       console.error(err);
       setQuizState('idle');
-      setStatusMessage(`Lỗi sinh Quiz: ${err.message}`);
+      setStatusMessage(`❌ Lỗi sinh Quiz: ${err.message}`);
     }
 
     setAnswers({});
@@ -157,7 +239,7 @@ function App() {
         ...prev,
         [quizIndex]: { ...prev[quizIndex], showResult: true }
       }));
-    }, 400);
+    }, 250);
   };
 
   return (
@@ -185,13 +267,6 @@ function App() {
         </div>
 
         <div className="nav-right">
-          <button 
-            className="lang-btn"
-            onClick={() => setShowKeyInput(!showKeyInput)}
-            style={{background: apiKey ? '#eff6ff' : 'transparent', color: apiKey ? '#1d4ed8' : 'inherit'}}
-          >
-            {apiKey ? 'API: CONNECTED' : '🔑 API KEY'}
-          </button>
           <button className="lang-btn">VI</button>
           <button className="icon-circle-btn" title="Chế độ tối">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -199,31 +274,11 @@ function App() {
         </div>
       </nav>
 
-      {/* POPUP CONFIG GEMINI API KEY */}
-      {showKeyInput && (
-        <div style={{background: '#1e293b', color: '#fff', padding: '0.6rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid #334155', zIndex: 40}}>
-          <span style={{fontSize: '0.85rem'}}>🔑 Gemini API Key:</span>
-          <input 
-            type="password" 
-            placeholder="Dán AI Key (AIZASy...)" 
-            value={apiKey} 
-            onChange={(e) => setApiKey(e.target.value)}
-            style={{flex: 1, padding: '0.4rem 0.8rem', borderRadius: '6px', border: '1px solid #475569', background: '#0f172a', color: '#fff', outline: 'none'}}
-          />
-          <button 
-            onClick={() => setShowKeyInput(false)}
-            style={{padding: '0.4rem 1rem', background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 600}}
-          >
-            Lưu Key
-          </button>
-        </div>
-      )}
-
-      {/* MAIN LAYOUT (3 COLUMNS) */}
-      <div className="main-layout">
+      {/* MAIN LAYOUT (3 COLUMNS WITH DRAGGABLE RESIZERS) */}
+      <div className={`main-layout ${isResizingLeft || isResizingRight ? 'is-resizing' : ''}`}>
         
-        {/* 2. LEFT SIDEBAR - HỌC LIỆU MÔN HỌC */}
-        <aside className="left-sidebar">
+        {/* 2. LEFT SIDEBAR */}
+        <aside className="left-sidebar" style={{ width: `${sidebarWidth}px` }}>
           <div className="sidebar-header-vlearn">
             <div className="header-icon-box">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
@@ -234,7 +289,6 @@ function App() {
             </div>
           </div>
 
-          {/* DANH SÁCH BÀI GIẢNG VLEARN */}
           <div className="folder-list">
             {courseData.map(folder => {
               const isSelected = activeCourseDay.id === folder.id;
@@ -264,17 +318,23 @@ function App() {
             })}
           </div>
 
-          {/* DANH SÁCH THUMBNAIL SLIDE XEM TRƯỚC */}
           {!isLoadingPdf && slides.length > 0 && (
             <SlideThumbnailList 
               slides={slides} 
               activeSlideIndex={activeSlideIndex} 
-              onSelectSlide={(idx) => { setActiveSlideIndex(idx); setQuizState('idle'); }} 
+              onSelectSlide={(idx) => { setActiveSlideIndex(idx); }} 
             />
           )}
         </aside>
 
-        {/* 3. CENTER READER STAGE - VERTICAL PAGINATED SLIDE VIEWER (VIRTUALIZED 60FPS) */}
+        {/* DRAGGABLE RESIZER BAR LEFT */}
+        <div 
+          className={`panel-resizer-bar ${isResizingLeft ? 'resizing' : ''}`}
+          onMouseDown={handleMouseDownLeft}
+          title="Kéo thả để mở rộng Sidebar trái"
+        />
+
+        {/* 3. CENTER READER STAGE */}
         <main className="reader-container">
           {isLoadingPdf ? (
             <div style={{textAlign: 'center', padding: '3rem', margin: 'auto'}}>
@@ -287,14 +347,20 @@ function App() {
               activeSlideIndex={activeSlideIndex} 
               onSelectSlide={(idx) => {
                 setActiveSlideIndex(idx);
-                setQuizState('idle');
               }} 
             />
           )}
         </main>
 
-        {/* 4. RIGHT SIDEBAR - VLEARN TUTOR */}
-        <aside className="right-sidebar">
+        {/* DRAGGABLE RESIZER BAR RIGHT */}
+        <div 
+          className={`panel-resizer-bar ${isResizingRight ? 'resizing' : ''}`}
+          onMouseDown={handleMouseDownRight}
+          title="Kéo thả để mở rộng khung Chatbot & Quiz"
+        />
+
+        {/* 4. RIGHT SIDEBAR - TUTOR CHATBOT & FLASH QUIZ */}
+        <aside className="right-sidebar" style={{ width: `${rightPanelWidth}px` }}>
           <div className="tutor-header">
             <div className="tutor-title-box">
               <div className="tutor-bot-icon">🤖</div>
@@ -310,83 +376,175 @@ function App() {
 
           <div className="panel-tabs">
             <button 
-              className={`tab-btn ${activeRightTab === 'quiz' ? 'active' : ''}`}
-              onClick={() => setActiveRightTab('quiz')}
-            >
-              ⚡ Flash Quiz (AI Thật)
-            </button>
-            <button 
               className={`tab-btn ${activeRightTab === 'chat' ? 'active' : ''}`}
               onClick={() => setActiveRightTab('chat')}
             >
-              Tutor Chatbot
+              💬 Tutor Chatbot
+            </button>
+            <button 
+              className={`tab-btn ${activeRightTab === 'quiz' ? 'active' : ''}`}
+              onClick={() => setActiveRightTab('quiz')}
+            >
+              ⚡ Flash Quiz (Toàn bộ PDF)
             </button>
           </div>
 
           <div className="tutor-content">
-            {/* TAB FLASH QUIZ */}
+            
+            {/* TAB 1: TUTOR CHATBOT WITH RAG RETRIEVAL & CLICKABLE MULTI-SOURCES */}
+            {activeRightTab === 'chat' && (
+              <>
+                {chatMessages.map((msg, i) => (
+                  <div key={i} style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                    {msg.role === 'user' ? (
+                      <>
+                        <span className="user-bubble-context">CÂU HỎI HỌC VIÊN</span>
+                        <div className="user-bubble-prompt">{msg.text}</div>
+                      </>
+                    ) : (
+                      <div className="tutor-card">
+                        <div style={{display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary)'}}>
+                          <span>🤖 AI Tutor</span>
+                        </div>
+
+                        <div className="tutor-quote-text">
+                          {msg.text}
+                        </div>
+
+                        {/* HIỂN THỊ DANH SÁCH NGUỒN CÓ THỂ CLICK ĐỂ JUMP SLIDE */}
+                        {msg.sources && msg.sources.length > 0 && (
+                          <div className="tutor-sources-box">
+                            <div className="tutor-sources-title">
+                              📚 Sources ({msg.sources.length} nguồn trích dẫn từ PDF)
+                            </div>
+                            <div className="tutor-sources-list">
+                              {msg.sources.map((src, sIdx) => {
+                                const dayText = src.dayTitle || (src.dayId === 'day1' ? 'Day 1' : 'Day 2');
+                                return (
+                                  <button
+                                    key={sIdx}
+                                    className="tutor-source-pill"
+                                    onClick={() => handleJumpToDocumentAndSlide(src.dayId, src.slide)}
+                                    title={`Click để chuyển đến ${dayText} - Slide ${src.slide}`}
+                                  >
+                                    📖 {dayText} - Slide {src.slide} ➔
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* NÚT SHORTCUT [📝 Làm Quiz] TỰ ĐỘNG CHUYỂN SANG TAB QUIZ */}
+                        <button 
+                          className="btn-quiz-shortcut"
+                          onClick={() => setActiveRightTab('quiz')}
+                        >
+                          📝 Làm Quiz kiểm tra kiến thức ➔
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isChatLoading && (
+                  <div className="tutor-card" style={{alignItems: 'center', padding: '1.5rem'}}>
+                    <div className="spinner-small"></div>
+                    <span style={{fontSize: '0.8rem', color: 'var(--text-sub)', marginTop: '0.5rem'}}>
+                      AI đang tra cứu tài liệu PDF & tổng hợp câu trả lời...
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* TAB 2: FLASH QUIZ TỪ TOÀN BỘ PDF */}
             {activeRightTab === 'quiz' && (
               <div className="quiz-container">
                 {statusMessage && (
-                  <div style={{padding: '0.6rem 0.8rem', background: isRealAICall ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '0.8rem', color: isRealAICall ? '#10B981' : '#D97706'}}>
+                  <div style={{padding: '0.6rem 0.8rem', background: isRealAICall ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', border: '1px solid var(--border)', borderRadius: '10px', fontSize: '0.8rem', color: isRealAICall ? '#10B981' : '#D97706', fontWeight: 500}}>
                     {statusMessage}
                   </div>
                 )}
 
                 {quizState === 'idle' && (
                   <div className="quiz-empty-state">
-                    <p style={{fontSize: '0.85rem', color: 'var(--text-sub)'}}>
-                      Đang xem <strong>Slide {activeSlideIndex + 1} (PDF Trang {currentSlide?.originalPage || 1})</strong>. Bạn muốn AI sinh câu hỏi Quiz tự kiểm tra hiểu bài không?
-                    </p>
-                    
-                    <div style={{width: '100%', background: 'var(--bg-main)', padding: '0.8rem', borderRadius: '10px', border: '1px solid var(--border)', textAlign: 'left'}}>
-                      <label style={{display: 'block', marginBottom: '0.4rem', fontWeight: 600, fontSize: '0.8rem'}}>Số lượng câu Quiz AI sinh:</label>
-                      <select 
-                        value={numQuestions} 
-                        onChange={(e) => setNumQuestions(Number(e.target.value))}
-                        style={{width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--border)', outline: 'none'}}
-                      >
-                        <option value={1}>1 Câu (Test nhanh 30s)</option>
-                        <option value={2}>2 Câu (Kiểm tra sâu)</option>
-                        <option value={3}>3 Câu (Toàn bộ khái niệm)</option>
-                      </select>
+                    <div className="quiz-hero-card">
+                      <div className="quiz-hero-title">
+                        <span>⚡ Flash Quiz AI Generator</span>
+                      </div>
+                      <p className="quiz-hero-desc">
+                        Tự động phân tích toàn bộ <strong>{slides.length} slide PDF ({currentDeckTitle})</strong> để sinh bộ Quiz trắc nghiệm kiểm tra mức độ hiểu bài.
+                      </p>
+
+                      <label style={{display: 'block', marginBottom: '0.5rem', fontWeight: 700, fontSize: '0.78rem', color: '#e2e8f0'}}>
+                        Số lượng câu hỏi muốn tạo:
+                      </label>
+                      
+                      <div className="preset-grid">
+                        {[5, 10, 15, 20].map(count => (
+                          <button 
+                            key={count} 
+                            className={`preset-btn ${numQuestions === count ? 'active' : ''}`}
+                            onClick={() => setNumQuestions(count)}
+                          >
+                            {count} câu
+                          </button>
+                        ))}
+                      </div>
+
+                      <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.6rem'}}>
+                        <span style={{fontSize: '0.75rem', color: '#94a3b8'}}>Tùy chỉnh:</span>
+                        <input 
+                          type="number" 
+                          min={1} 
+                          max={30} 
+                          value={numQuestions} 
+                          onChange={(e) => setNumQuestions(Math.max(1, Math.min(30, Number(e.target.value))))}
+                          style={{width: '60px', padding: '0.3rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.2)', background: 'rgba(255, 255, 255, 0.1)', color: '#fff', fontSize: '0.8rem', outline: 'none'}}
+                        />
+                        <span style={{fontSize: '0.75rem', color: '#94a3b8'}}>câu</span>
+                      </div>
                     </div>
 
                     <button 
                       className="btn-generate-quiz" 
-                      onClick={handleGenerateQuiz}
+                      onClick={handleGenerateFullPdfQuiz}
                     >
-                      🤖 Sinh Quiz Từ Slide {activeSlideIndex + 1}
+                      🤖 Sinh {numQuestions} Câu Quiz Từ Toàn Bộ PDF
                     </button>
                   </div>
                 )}
 
                 {quizState === 'loading' && (
-                  <div className="quiz-empty-state">
+                  <div className="quiz-empty-state" style={{padding: '3rem 1rem'}}>
                     <div className="spinner-small"></div>
-                    <p style={{fontWeight: 500}}>AI đang đọc Slide {activeSlideIndex + 1} để sinh {numQuestions} câu Quiz...</p>
+                    <p style={{fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-main)'}}>AI đang đọc toàn bộ {slides.length} slide PDF để tạo {numQuestions} câu Quiz...</p>
                   </div>
                 )}
 
                 {quizState === 'quiz' && activeQuizzes.length > 0 && (
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '1.25rem'}}>
                     {activeQuizzes.map((quizItem, qIdx) => {
                       const ansState = answers[qIdx];
                       const isResultShowing = ansState?.showResult;
                       const userSelection = ansState?.selected;
+                      const sourceSlideNum = quizItem.source_slide || (qIdx + 1);
+                      const isCorrect = userSelection === quizItem.correctIndex || quizItem.options[userSelection] === quizItem.correct_answer;
 
                       return (
                         <div key={qIdx} className="quiz-question-box">
-                          <div className="q-text">Câu {qIdx + 1}: {quizItem.question}</div>
+                          <div className="q-header-row">
+                            <span className="q-num-pill">Q{qIdx < 9 ? `0${qIdx + 1}` : qIdx + 1}</span>
+                            <div className="q-text">{quizItem.question}</div>
+                          </div>
                           
-                          <div className="options-col">
+                          <div style={{display: 'flex', flexDirection: 'column', gap: '0.4rem'}}>
                             {quizItem.options.map((opt, oIdx) => {
-                              let btnClass = "opt-btn";
+                              let btnClass = "opt-btn-modern";
                               if (isResultShowing) {
-                                if (oIdx === quizItem.correctIndex) btnClass += " correct";
+                                if (oIdx === quizItem.correctIndex || opt === quizItem.correct_answer) btnClass += " correct";
                                 else if (oIdx === userSelection) btnClass += " wrong";
-                              } else if (oIdx === userSelection) {
-                                btnClass += " selected";
                               }
 
                               return (
@@ -396,18 +554,36 @@ function App() {
                                   onClick={() => handleSelectOption(qIdx, oIdx)}
                                   disabled={isResultShowing}
                                 >
-                                  {String.fromCharCode(65 + oIdx)}. {opt}
+                                  <span className="opt-badge-circle">{String.fromCharCode(65 + oIdx)}</span>
+                                  <span style={{flex: 1}}>{opt}</span>
                                 </button>
                               )
                             })}
                           </div>
 
                           {isResultShowing && (
-                            <div className={`quiz-feedback ${userSelection === quizItem.correctIndex ? 'success' : 'error'}`}>
-                              <h4 style={{fontWeight: 700, marginBottom: '0.3rem'}}>
-                                {userSelection === quizItem.correctIndex ? '✔ Chính xác!' : '✖ Sai rồi!'}
-                              </h4>
-                              <p>{quizItem.explanation}</p>
+                            <div className="quiz-feedback-box">
+                              {isCorrect ? (
+                                <div className="feedback-title-success">
+                                  ✔ Chính xác! ({quizItem.correct_answer || quizItem.options[quizItem.correctIndex]})
+                                </div>
+                              ) : (
+                                <div className="feedback-title-error">
+                                  ✖ Chưa đúng. Đáp án chuẩn: {quizItem.correct_answer || quizItem.options[quizItem.correctIndex]}
+                                </div>
+                              )}
+                              
+                              <p style={{color: 'var(--text-sub)', margin: '0.4rem 0'}}>
+                                💡 <strong>Giải thích:</strong> {quizItem.explanation}
+                              </p>
+
+                              <button 
+                                className="source-slide-link" 
+                                onClick={() => handleJumpToDocumentAndSlide(activeCourseDay.id, sourceSlideNum)}
+                                title="Click để tự động trượt Slide Viewer đến đúng trang này"
+                              >
+                                📖 Nguồn: Slide {sourceSlideNum} ➔
+                              </button>
                             </div>
                           )}
                         </div>
@@ -415,79 +591,29 @@ function App() {
                     })}
                     
                     <button 
-                      style={{padding: '0.6rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem'}}
+                      style={{padding: '0.75rem', borderRadius: '12px', border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)', boxShadow: 'var(--shadow-sm)'}}
                       onClick={() => setQuizState('idle')}
                     >
-                      🔄 Sinh lượt Test mới cho Slide {activeSlideIndex + 1}
+                      🔄 Sinh bộ Quiz mới từ PDF
                     </button>
                   </div>
                 )}
               </div>
             )}
 
-            {/* TAB TUTOR CHATBOT */}
-            {activeRightTab === 'chat' && (
-              <>
-                {chatMessages.map((msg, i) => (
-                  <div key={i} style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-                    {msg.role === 'user' ? (
-                      <>
-                        <span className="user-bubble-context">NGỮ CẢNH: SLIDE TRANG {msg.page} "{currentDeckTitle}"</span>
-                        <div className="user-bubble-prompt">{msg.text}</div>
-                      </>
-                    ) : (
-                      <div className="tutor-card">
-                        <div className="tutor-quote-text">
-                          "{msg.text}"
-                        </div>
-
-                        {msg.citation && (
-                          <div className="citation-dropdown">
-                            <div className="citation-header">
-                              <span>🔗 1 nguồn tham khảo</span>
-                              <span>▲</span>
-                            </div>
-                            <div className="citation-item">
-                              <span className="cite-num-badge">1</span>
-                              <div style={{flex: 1}}>
-                                <span style={{fontWeight: 600}}>{msg.citation}</span>
-                              </div>
-                              <span style={{color: 'var(--text-sub)', fontSize: '0.7rem'}}>Tr.{msg.page}</span>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="feedback-row">
-                          <span>Phản hồi này có hữu ích không?</span>
-                          <div className="thumbs-btns">
-                            <button className="thumb-btn">👍</button>
-                            <button className="thumb-btn">👎</button>
-                          </div>
-                        </div>
-
-                        <div className="confidence-bar-row">
-                          <div className="confidence-bar" style={{width: `${msg.confidence || 85}%`}}></div>
-                          <span>{msg.confidence || 85}% - Rất tin cậy</span>
-                          <span className="answered-badge">● ĐÃ TRẢ LỜI</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </>
-            )}
-
           </div>
 
+          {/* INPUT GỬI CÂU HỎI TUTOR CHATBOT */}
           <form className="tutor-input-container" onSubmit={handleSendMessage}>
             <div className="tutor-input-wrapper">
               <input 
                 type="text" 
-                placeholder="Nhập câu hỏi hoặc bôi đen tài liệu..." 
+                placeholder="Nhập câu hỏi tra cứu tài liệu PDF..." 
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
+                disabled={isChatLoading}
               />
-              <button type="submit" className="send-circle-btn">
+              <button type="submit" className="send-circle-btn" disabled={isChatLoading}>
                 ➤
               </button>
             </div>

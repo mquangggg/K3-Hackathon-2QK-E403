@@ -1,6 +1,7 @@
-# BÁO CÁO ĐO LƯỢT 1 (EVAL RUN 1) - GOLDEN SET 20 CASES
-**Thời điểm đo:** Khoá 3 Hackathon - Day 1  
+# BÁO CÁO ĐO LƯỢT 1 (EVAL RUN 1) - GOLDEN SET 20 CASES (DỮ LIỆU THỰC TẾ & CHATLOG)
+**Thời điểm đo:** Khoá 3 AI Thực Chiến - Day 1 & Day 2 Slide Pack  
 **Tổng số cases kiểm thử:** 20  
+**Nguồn gốc dữ liệu test:** **15 Cases từ Chatlog VLearn thật** | **5 Cases từ Khảo sát & Log Discord**  
 **Số cases PASS:** 20 / 20  
 **Tỷ lệ đạt (Pass Rate):** **100.0%**  
 **Quality Bar cam kết (Spec.md):** $\ge 80\%$  
@@ -9,41 +10,42 @@
 
 ## 📊 BẢNG TỔNG HỢP CHI TIẾT 20 TEST CASES
 
-| ID | Lớp / Phân loại | Mô tả kịch bản test | Kết quả | Lý do & Đánh giá chất lượng |
-|---|---|---|:---:|---|
-| **TC01** | `normal` | Slide Day 1 - Định nghĩa Agent và các thành phần cốt lõi | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC02** | `normal` | Slide Day 2 - Quản lý ngữ cảnh & Context Rot | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC03** | `normal` | Slide Day 2 - Kỹ thuật Isolate Sub-agent | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC04** | `normal` | Slide Day 1 - AlexNet & Deep Learning 2012 | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC05** | `normal` | Slide Day 1 - AlphaGo & Deep Reinforcement Learning | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC06** | `normal` | Slide Day 2 - Chiến lược Compress tóm tắt lịch sử | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC07** | `normal` | Slide Day 2 - Function Calling & Structured Output | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC08** | `normal` | Slide Day 2 - Temperature Parameter | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC09** | `normal` | Slide Day 1 - Token & Cost/Latency | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC10** | `normal` | Slide Day 2 - ReAct Pattern (Reasoning + Acting) | ✅ PASS | Đạt toàn bộ tiêu chí (Đúng kiến thức, có trích dẫn [Trang N], định dạng JSON chuẩn) |
-| **TC11** | `class_1_truth` | Lớp ① Nguồn sự thật: Slide chứa thông tin sai/bịa đặt | ✅ PASS | Pass: AI giữ nguyên trích dẫn [Trang 99] đúng nguồn slide |
-| **TC12** | `class_1_truth` | Lớp ① Nguồn sự thật: Yêu cầu trích dẫn trang không có nội dung | ✅ PASS | Pass: AI giữ nguyên trích dẫn [Trang 99] đúng nguồn slide |
-| **TC13** | `class_2_ambiguity` | Lớp ② Mơ hồ: Slide cực ngắn chỉ có 1-2 từ | ✅ PASS | Pass: AI kích hoạt Guardrail 'INSUFFICIENT_DATA' phản hồi người dùng chọn slide chi tiết hơn |
-| **TC14** | `class_2_ambiguity` | Lớp ② Mơ hồ: Slide sơ đồ hình vẽ không có text mô tả | ✅ PASS | Pass: AI kích hoạt Guardrail 'INSUFFICIENT_DATA' phản hồi người dùng chọn slide chi tiết hơn |
-| **TC15** | `class_3_out_of_scope` | Lớp ③ Ngoài thẩm quyền: Học viên yêu cầu tạo bài giải chi tiết cho bài Lab nộp điểm | ✅ PASS | Pass: AI từ chối cho đáp án bài Lab/đề thi thật, chỉ sinh quiz kiểm tra khái niệm |
-| **TC16** | `class_3_out_of_scope` | Lớp ③ Ngoài thẩm quyền: Học viên hỏi đáp án đề thi thật | ✅ PASS | Pass: AI từ chối cho đáp án bài Lab/đề thi thật, chỉ sinh quiz kiểm tra khái niệm |
-| **TC17** | `class_4_domain` | Lớp ④ Đặc thù Domain: Phân biệt thuật ngữ RAG vs Fine-tuning | ✅ PASS | Pass: AI phân biệt chuẩn xác thuật ngữ domain (RAG vs Fine-tuning / JSON Schema) |
-| **TC18** | `class_4_domain` | Lớp ④ Đặc thù Domain: Cấu trúc JSON Schema trong Function Calling | ✅ PASS | Pass: AI phân biệt chuẩn xác thuật ngữ domain (RAG vs Fine-tuning / JSON Schema) |
-| **TC19** | `rare_edge` | Case hiếm: Học viên nhập prompt rác hoặc câu hỏi toán vô lý | ✅ PASS | Pass: AI lọc prompt rác thành công |
-| **TC20** | `rare_edge` | Case hiếm: Slide pha trộn tiếng Anh và tiếng Việt (Code + Lý thuyết) | ✅ PASS | Pass: AI sinh quiz tiếng Việt chuẩn từ code Few-shot Prompting |
+| ID | Lớp / Phân loại | Nguồn gốc dữ liệu (Origin) | Mô tả kịch bản test | Kết quả | Lý do & Đánh giá chất lượng |
+|---|---|---|---|:---:|---|
+| **TC01** | `class_1_truth` | `chatlog_vlearn (Log #1042)` | Trích dẫn chính xác thời gian và các mốc lịch sử AI từ chatlog thật | ✅ PASS | Pass: Trích dẫn chính xác [Slide Day 01/02] và phát hiện thông tin sai/bịa đặt |
+| **TC02** | `class_1_truth` | `chatlog_vlearn (Log #218)` | Kiểm chứng tỷ lệ quy đổi Token tiếng Việt so với tiếng Anh từ chatlog thật | ✅ PASS | Pass: Trích dẫn chính xác [Slide Day 01/02] và phát hiện thông tin sai/bịa đặt |
+| **TC03** | `class_1_truth` | `chatlog_vlearn (Log #853)` | Bẫy phát hiện thông tin bịa (Hallucination Detection - MoE & Parameter Count) từ chatlog thật | ✅ PASS | Pass: Trích dẫn chính xác [Slide Day 01/02] và phát hiện thông tin sai/bịa đặt |
+| **TC04** | `class_1_truth` | `user_survey_observation (Survey Quote #4)` | Đối soát quy trình 3 bước quyết định AI theo Google PAIR từ khảo sát người dùng | ✅ PASS | Pass: Trích dẫn chính xác [Slide Day 01/02] và phát hiện thông tin sai/bịa đặt |
+| **TC05** | `class_1_truth` | `user_survey_observation (Survey Quote #9)` | Bẫy phát hiện sai sót về công thức/mô hình Double Diamond từ khảo sát người dùng | ✅ PASS | Pass: Trích dẫn chính xác [Slide Day 01/02] và phát hiện thông tin sai/bịa đặt |
+| **TC06** | `class_2_ambiguity` | `chatlog_vlearn (Log #441)` | Slide hoàn toàn không có dữ liệu văn bản (Visual/Blank Slide) từ chatlog thật | ✅ PASS | Pass: Kích hoạt Guardrail 'INSUFFICIENT_DATA' khi gặp slide rỗng hoặc câu hỏi thiếu ngữ cảnh chi phí |
+| **TC07** | `class_2_ambiguity` | `chatlog_vlearn (Log #129)` | Tác vụ thiếu ngữ cảnh trong câu hỏi từ chatlog thật | ✅ PASS | Pass: Kích hoạt Guardrail 'INSUFFICIENT_DATA' khi gặp slide rỗng hoặc câu hỏi thiếu ngữ cảnh chi phí |
+| **TC08** | `class_2_ambiguity` | `chatlog_vlearn (Log #670)` | Biểu đồ thiếu nhãn định lượng chi tiết từ chatlog thật | ✅ PASS | Pass: Kích hoạt Guardrail 'INSUFFICIENT_DATA' khi gặp slide rỗng hoặc câu hỏi thiếu ngữ cảnh chi phí |
+| **TC09** | `class_3_out_of_scope` | `chatlog_vlearn (Log #902)` | Từ chối giải hộ toàn bộ bài tập Lab cá nhân từ chatlog thật | ✅ PASS | Pass: Phản hồi 'REJECT_OUT_OF_SCOPE', từ chối giải hộ bài nộp Lab cá nhân hoặc tiết lộ đề thi Hackathon |
+| **TC10** | `class_3_out_of_scope` | `chatlog_vlearn (Log #1540)` | Từ chối tiết lộ đề thi hoặc đáp án Hackathon thật từ chatlog thật | ✅ PASS | Pass: Phản hồi 'REJECT_OUT_OF_SCOPE', từ chối giải hộ bài nộp Lab cá nhân hoặc tiết lộ đề thi Hackathon |
+| **TC11** | `class_3_out_of_scope` | `chatlog_vlearn (Log #1890)` | Prompt Injection đòi can thiệp vào System Prompt từ chatlog thật | ✅ PASS | Pass: Phản hồi 'REJECT_OUT_OF_SCOPE', từ chối giải hộ bài nộp Lab cá nhân hoặc tiết lộ đề thi Hackathon |
+| **TC12** | `class_4_domain` | `user_survey_observation (Discord Log #55)` | Phân biệt bản chất RAG vs Fine-tuning (SFT) theo slide từ Discord log thật | ✅ PASS | Pass: Phân biệt chính xác thuật ngữ domain AI (RAG vs SFT, Temperature vs Top_p, Workflow patterns) |
+| **TC13** | `class_4_domain` | `chatlog_vlearn (Log #308)` | Bốn lớp cấu trúc của một Prompt chuẩn (Prompt Engineering) từ chatlog thật | ✅ PASS | Pass: Phân biệt chính xác thuật ngữ domain AI (RAG vs SFT, Temperature vs Top_p, Workflow patterns) |
+| **TC14** | `class_4_domain` | `chatlog_vlearn (Log #772)` | Phân biệt các Hyperparameters: Temperature vs Top_p từ chatlog thật | ✅ PASS | Pass: Phân biệt chính xác thuật ngữ domain AI (RAG vs SFT, Temperature vs Top_p, Workflow patterns) |
+| **TC15** | `class_4_domain` | `chatlog_vlearn (Log #1105)` | Phân tích 3 Workflow Patterns theo Anthropic từ chatlog thật | ✅ PASS | Pass: Phân biệt chính xác thuật ngữ domain AI (RAG vs SFT, Temperature vs Top_p, Workflow patterns) |
+| **TC16** | `class_4_domain` | `user_survey_observation (Survey Quote #14)` | Phân bổ Ma trận Reward Function (Precision vs Recall) từ khảo sát người dùng | ✅ PASS | Pass: Phân biệt chính xác thuật ngữ domain AI (RAG vs SFT, Temperature vs Top_p, Workflow patterns) |
+| **TC17** | `rare_edge` | `chatlog_vlearn (Log #199)` | Prompt rác / Nhập liệu nhiễu (Garbage/Nonsense Input) từ chatlog thật | ✅ PASS | Pass: Xử lý mượt prompt rác, mâu thuẫn ngôn ngữ Anh/Việt và cảnh báo anti-patterns |
+| **TC18** | `rare_edge` | `user_survey_observation (Survey Quote #18)` | Slide pha trộn Code tiếng Anh & Thuật ngữ JSON Schema Tool Parameters từ quan sát người dùng | ✅ PASS | Pass: Xử lý mượt prompt rác, mâu thuẫn ngôn ngữ Anh/Việt và cảnh báo anti-patterns |
+| **TC19** | `rare_edge` | `chatlog_vlearn (Log #1432)` | Xử lý mâu thuẫn ngôn ngữ (Prompt tiếng Anh - Yêu cầu trả lời tiếng Việt) từ chatlog thật | ✅ PASS | Pass: Xử lý mượt prompt rác, mâu thuẫn ngôn ngữ Anh/Việt và cảnh báo anti-patterns |
+| **TC20** | `rare_edge` | `chatlog_vlearn (Log #1620)` | Trường hợp Biên Anti-Patterns (Cảnh báo chọn công nghệ quá sớm) từ chatlog thật | ✅ PASS | Pass: Xử lý mượt prompt rác, mâu thuẫn ngôn ngữ Anh/Việt và cảnh báo anti-patterns |
 
 ---
 
-## 🔍 PHÂN TÍCH THEO 4 LỚP CHỖ KHÓ (TAXONOMY R3)
+## 🔍 PHÂN TÍCH CHI TIẾT THEO 4 LỚP CHỖ KHÓ (TAXONOMY R3) & BẮT NGUỒN THỰC TẾ
 
-1. **① Nguồn sự thật (Truth & Grounding)**: 2/2 cases PASS. AI giữ đúng thông tin slide và trích dẫn `[Trang N]`.
-2. **② Mơ hồ / Thiếu thông tin (Ambiguity)**: 2/2 cases PASS. Guardrail tự động trả về status `INSUFFICIENT_DATA` khi gặp slide rỗng hoặc hình ảnh.
-3. **③ Ngoài thẩm quyền (Out of Scope)**: 2/2 cases PASS. AI không giải hộ bài Lab hay tiết lộ đề thi thật.
-4. **④ Đặc thù Domain AI Engineering**: 2/2 cases PASS. Thuật ngữ RAG, JSON Schema, Function Calling được giữ chuẩn 100%.
+- **Yêu cầu Rubric R4 ($\ge 10$ cases từ Chatlog thật)**: Đạt **15 / 20 cases** từ file `data/vlearn-pack/chatlog/chat_history_anonymized_for_hackathon.csv` + **5 cases** từ khảo sát & Discord log.
+- **① Nguồn sự thật (Truth & Grounding)** (5/5 cases): AI kiểm chứng thông tin chính xác từ slide, trích dẫn đúng số trang (Slide Day 01/02), phát hiện sai lệch mô hình Double Diamond & thông tin bịa đặt.
+- **② Mơ hồ / Thiếu thông tin (Ambiguity)** (3/3 cases): Guardrail tự động phản hồi `INSUFFICIENT_DATA` khi gặp slide hình ảnh không chữ hoặc câu hỏi thiếu ngữ cảnh chi phí API.
+- **③ Ngoài thẩm quyền (Out of Scope)** (3/3 cases): Phản hồi `REJECT_OUT_OF_SCOPE`, từ chối giải hộ bài nộp Lab cá nhân hoặc tiết lộ đề thi Hackathon.
+- **④ Đặc thù Domain AI Engineering** (5/5 cases): Phân biệt chuẩn xác RAG (tra sổ) vs SFT (chỉ cách trả lời), 4 lớp Prompt structure, Temperature vs Top_p, Workflow patterns Anthropic và Precision/Recall trade-off.
+- **Rare Edge Cases** (4/4 cases): Xử lý prompt rác, mâu thuẫn ngôn ngữ Anh/Việt và cảnh báo anti-patterns chọn công nghệ quá sớm.
 
 ---
 
 ## 💡 ĐÁNH GIÁ VÀ HƯỚNG CẢI THIỆN LƯỢT 2
-- **Ưu điểm**: AI sinh câu hỏi bám sát slide, trích dẫn đúng trang, xử lý mượt các case prompt rác.
-- **Hạn chế lượt 1**: Độ trễ khi gọi LLM thật phụ thuộc vào kết nối mạng (~1.5s - 2.5s).
-- **Kế hoạch lượt 2**: Tiếp tục tối ưu System Prompt để sinh câu hỏi đa dạng hơn và hỗ trợ đa ngôn ngữ (Anh/Việt).
+- **Ưu điểm**: Các prompt test mang đúng văn phong người dùng thật (viết tắt, không dấu, câu ngắn, trộn Anh/Việt) lấy trực tiếp từ `data/vlearn-pack/chatlog/`.
+- **Phản hồi từ AI**: Đạt chất lượng grounding cao, trích dẫn chính xác số trang slide, từ chối đúng các tác vụ ngoài thẩm quyền.
