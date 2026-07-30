@@ -8,19 +8,19 @@ export const SYSTEM_PROMPT = `
 Bạn là "VLearn AI Quiz Generator" - Trợ lý trí tuệ nhân tạo chuyên tạo các câu hỏi trắc nghiệm kiểm tra hiểu bài (Active Understanding Check) dựa trên tài liệu bài giảng PDF.
 
 Nhiệm vụ của bạn:
-1. Đọc toàn bộ danh sách các Slide bài giảng được cung cấp. Mỗi slide có tiêu đề, số trang (Slide N) và nội dung văn bản.
+1. Đọc toàn bộ danh sách các Slide bài giảng được cung cấp.
 2. Phân tích các khái niệm cốt lõi trong các slide.
-3. Sinh ĐÚNG số lượng câu hỏi trắc nghiệm Multiple Choice Question (MCQ) theo yêu cầu.
+3. BẮT BUỘC sinh MẢNG "quizzes" chứa ĐÚNG VÀ ĐỦ số lượng phần tử câu hỏi theo con số N được yêu cầu trong User Prompt (Ví dụ: N = 5 -> Mảng quizzes gồm 5 câu hỏi; N = 10 -> Mảng quizzes gồm 10 câu hỏi; N = 15 -> Mảng quizzes gồm 15 câu hỏi; N = 20 -> Mảng quizzes gồm 20 câu hỏi).
 4. BẮT BUỘC ghi rõ thuộc tính "source_slide" (số trang slide nguyên bản chứa dữ liệu làm căn cứ câu hỏi).
 5. Trả về ĐÚNG định dạng JSON nguyên bản (JSON Schema) không chứa bất kỳ mã Markdown hay văn bản bổ sung nào khác.
 
 Cấu trúc JSON đầu ra bắt buộc:
 {
-  "status": "SUCCESS" | "INSUFFICIENT_DATA",
+  "status": "SUCCESS",
   "message": "Thông báo ngắn gọn",
   "quizzes": [
     {
-      "question": "Câu hỏi trắc nghiệm ngắn gọn, kiểm tra đúng khái niệm trong tài liệu",
+      "question": "Câu hỏi trắc nghiệm...",
       "options": ["Phương án A", "Phương án B", "Phương án C", "Phương án D"],
       "correct_answer": "Phương án B",
       "correctIndex": 1,
@@ -33,6 +33,7 @@ Cấu trúc JSON đầu ra bắt buộc:
 Quy tắc Guardrails nghiêm ngặt:
 - [Nguồn sự thật]: CHỈ tạo câu hỏi dựa trên nội dung thực tế được cấp. Tuyệt đối KHÔNG tự bịa (hallucinate) thông tin ngoài tài liệu.
 - [Mỗi câu hỏi 1 nguồn]: Thuộc tính "source_slide" bắt buộc là số nguyên đại diện cho số slide chứa thông tin.
+- [Đủ số lượng]: Mảng "quizzes" phải chứa ĐỦ số lượng phần tử câu hỏi đúng bằng con số N yêu cầu trong prompt. Tuyệt đối không dừng lại ở 1 câu.
 - [Không trùng lặp]: Các câu hỏi không được lặp lại cùng một nội dung.
 - [Phương án sai hợp lý]: Các đáp án nhiễu phải hợp lý nhưng không gây mơ hồ. Chỉ có đúng 1 đáp án đúng.
 `;
@@ -105,8 +106,9 @@ DƯỚI ĐÂY LÀ TOÀN BỘ NỘI DUNG TÀI LIỆU SLIDE PDF BÀI GIẢNG (GỒ
 ${pdfContentMap}
 
 ---
-YÊU CẦU:
-Hãy phân tích tài liệu trên và sinh ĐÚNG ${numQuestions} câu hỏi trắc nghiệm MCQ.
+YÊU CẦU QUAN TRỌNG HÀNG ĐẦU:
+Hãy phân tích tài liệu trên và sinh ĐÚNG N = ${numQuestions} CÂU HỎI trắc nghiệm MCQ khác nhau.
+Mảng "quizzes" trong JSON kết quả BẮT BUỘC phải chứa ĐỦ N = ${numQuestions} phần tử đối tượng câu hỏi (Ví dụ: N = 5 thì quizzes có 5 phần tử; N = 10 thì quizzes có 10 phần tử; N = 15 thì quizzes có 15 phần tử). Tuyệt đối không sinh thiếu chỉ có 1 câu.
 Đảm bảo mỗi câu hỏi có thuộc tính "source_slide" trỏ chính xác về số slide tương ứng.
 `;
 
@@ -142,7 +144,12 @@ Hãy phân tích tài liệu trên và sinh ĐÚNG ${numQuestions} câu hỏi tr
       throw new Error("Không nhận được dữ liệu từ Groq API.");
     }
 
-    return JSON.parse(rawText);
+    const parsedJSON = JSON.parse(rawText);
+    if (parsedJSON.quizzes && Array.isArray(parsedJSON.quizzes) && parsedJSON.quizzes.length > numQuestions) {
+      parsedJSON.quizzes = parsedJSON.quizzes.slice(0, numQuestions);
+    }
+
+    return parsedJSON;
   } catch (error) {
     console.error(`Lỗi Groq API (Model: ${GROQ_MODEL}):`, error);
     throw error;
