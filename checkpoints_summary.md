@@ -54,8 +54,8 @@ gantt
 - **Công việc cụ thể đã hoàn thành**:
   1. **Xây dựng Lời gọi AI thật (`aiService.js`)**: Kết nối Google Gemini 2.5 Flash API bằng JSON Schema cấu trúc nguyên bản.
   2. **Xây dựng Golden Set 20 Test Cases (`golden_set.json`)**:
-     - Đạt 15/20 cases (75%) lấy trực tiếp từ file Chatlog VLearn thật (`data/vlearn-pack/chatlog/`).
-     - Đạt 5/20 cases lấy từ khảo sát & Discord log.
+     - Đạt **10/20 cases (50%)** lấy trực tiếp từ file Chatlog VLearn thật (`data/vlearn-pack/chatlog/`).
+     - Đạt **10/20 cases (50%)** lấy từ Khảo sát người dùng & Discord log.
      - Phân bổ đủ 4 lớp chỗ khó: ① Truth & Grounding (5 cases), ② Ambiguity (3 cases), ③ Out of Scope (3 cases), ④ Domain AI Engineering (5 cases) + 4 Rare Edge Cases.
   3. **Viết Script Kiểm thử Eval (`run_eval.py`)**: Tự động đo và xuất báo cáo Markdown [results_run1.md](file:///c:/Users/Nitro%20Tiger/OneDrive/Dokumen/VInUni_AI/Lab/Hackathon/Batch03-K3-AI-Product-Hackathon/eval/results_run1.md).
   4. **Kết quả đo Run 1**: Đạt **20/20 PASS = 100%** (Vượt mốc cam kết $\ge 80\%$).

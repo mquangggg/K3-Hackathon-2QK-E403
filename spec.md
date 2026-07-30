@@ -69,7 +69,7 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
 
 ## §7. Kiểm thử & Quality Bar (Gold Set $\ge 20$ cases)
 
-- **Bộ kiểm thử Golden Set**: Lưu tại `eval/golden_set.json` (20 cases gồm **15 cases bắt nguồn từ Chatlog VLearn thật** trong `data/vlearn-pack/chatlog/` + **5 cases từ khảo sát & Discord log**).
+- **Bộ kiểm thử Golden Set**: Lưu tại `eval/golden_set.json` (20 cases gồm **10 cases từ Chatlog VLearn thật** trong `data/vlearn-pack/chatlog/` + **10 cases từ Khảo sát & Discord log**).
 - **Kết quả đo lượt 1 (Run 1)**: Lưu tại `eval/results_run1.md` (Đạt **20/20 PASS = 100%**).
 - **Quality Bar cam kết (chốt cứng trước 23:59 N1)**:
   - **Pass Rate $\ge 80\%$** trên bộ Golden Set 20 cases bám sát Chatlog thật.
