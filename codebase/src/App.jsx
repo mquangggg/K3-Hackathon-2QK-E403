@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { generateQuizFromFullPdf, askTutorChatbot } from './services/aiService';
 import { loadPdfFromUrl } from './services/pdfService';
-import { retrieveRelevantSlides } from './services/ragService';
+import { processSmartRetrieval } from './services/ragService';
 import { vlearnRealCourseData as courseData } from './data/vlearnData';
 import SlideThumbnailList from './components/SlideThumbnailList';
 import MainSlideViewer from './components/MainSlideViewer';
@@ -38,7 +38,7 @@ function App() {
   const [chatMessages, setChatMessages] = useState([
     {
       role: 'bot',
-      text: 'Chào bạn! Mình là AI Tutor trợ lý học tập theo ngữ cảnh. Bạn có thể hỏi mình bất kỳ kiến thức nào trong các bài giảng PDF, mình sẽ trích dẫn chính xác trang slide chứng minh nhé!',
+      text: 'Chào bạn! Mình là AI Tutor trợ lý học tập theo ngữ cảnh. Bạn có thể hỏi bất kỳ kiến thức nào ("LLM là gì?") hoặc yêu cầu tóm tắt ("Tóm tắt Day 1", "Tóm tắt Slide 5 đến Slide 10"), mình sẽ tổng hợp chính xác từ PDF bài giảng!',
       sources: [
         { dayId: 'day1', dayTitle: 'Day 1', slide: 1 }
       ]
@@ -117,7 +117,7 @@ function App() {
 
   const currentSlide = slides[activeSlideIndex] || slides[0];
 
-  // --- XỬ LÝ GỬI TIN NHẮN CHATBOT VỚI RAG RETRIEVAL & GROUNDING ---
+  // --- XỬ LÝ GỬI TIN NHẮN CHATBOT VỚI INTENT DETECTION & METADATA RETRIEVAL ---
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!chatInput.trim() || isChatLoading) return;
@@ -126,19 +126,38 @@ function App() {
     setChatInput('');
     setIsChatLoading(true);
 
-    // Thêm tin nhắn của học viên vào danh sách
     const newHistory = [...chatMessages, { role: 'user', text: userPrompt }];
     setChatMessages(newHistory);
 
     try {
-      // 1. RAG Retrieval: Tìm kiếm các đoạn slide liên quan nhất từ tất cả PDF bài giảng
-      const retrievedChunks = await retrieveRelevantSlides(userPrompt, slides, courseData, 4);
+      // 1. Phân loại Ý định (Intent) & Retrieval thông minh (QA vs Summary Range)
+      const searchResult = await processSmartRetrieval(userPrompt, slides, courseData);
 
-      // 2. Gọi Gemini API với System Prompt Grounding nghiêm ngặt
+      // Nếu Intent == QUIZ -> Chuyển tự động sang tab Flash Quiz & TỰ ĐỘNG SINH QUIZ
+      if (searchResult.intent === 'QUIZ') {
+        const targetCount = searchResult.numQuestions || 5;
+        setNumQuestions(targetCount);
+        setActiveRightTab('quiz');
+        setChatMessages(prev => [
+          ...prev,
+          {
+            role: 'bot',
+            text: `✨ Đã nhận yêu cầu! Đang chuyển sang tab Flash Quiz và sinh ngay ${targetCount} câu hỏi trắc nghiệm cho bạn...`,
+            sources: []
+          }
+        ]);
+        setIsChatLoading(false);
+        // Tự động gọi AI sinh Quiz ngay lập tức!
+        handleGenerateFullPdfQuiz(targetCount);
+        return;
+      }
+
+      // 2. Gọi AI Tutor Chatbot với Intent & Retrieved Chunks phù hợp
       const result = await askTutorChatbot({
         question: userPrompt,
+        intent: searchResult.intent,
         history: chatMessages,
-        retrievedChunks
+        retrievedChunks: searchResult.retrievedChunks
       });
 
       if (result && result.answer) {
@@ -147,9 +166,15 @@ function App() {
           {
             role: 'bot',
             text: result.answer,
-            sources: result.used_sources || []
+            sources: result.used_sources || [],
+            intent: searchResult.intent
           }
         ]);
+
+        // Nếu tóm tắt một Day khác với Day đang mở, tự động thông báo
+        if (searchResult.requestedDayId && searchResult.requestedDayId !== activeCourseDay.id) {
+          setStatusMessage(`💡 AI đã tổng hợp tài liệu ${searchResult.requestedDayId === 'day1' ? 'Day 1' : 'Day 2'}. Click vào nguồn để chuyển tài liệu!`);
+        }
       } else {
         setChatMessages(prev => [
           ...prev,
@@ -166,7 +191,7 @@ function App() {
         ...prev,
         {
           role: 'bot',
-          text: `❌ Lỗi tra cứu: ${err.message}`,
+          text: `❌ Lỗi xử lý: ${err.message}`,
           sources: []
         }
       ]);
@@ -193,19 +218,20 @@ function App() {
   };
 
   // --- KÍCH HOẠT AI SINH QUIZ TỪ TOÀN BỘ SLIDE PDF ---
-  const handleGenerateFullPdfQuiz = async () => {
+  const handleGenerateFullPdfQuiz = async (overrideCount = null) => {
     if (!slides || slides.length === 0) {
       setStatusMessage("⚠️ Chưa có dữ liệu Slide PDF. Vui lòng đợi nạp tài liệu xong.");
       return;
     }
 
+    const countToGenerate = overrideCount || numQuestions;
     setQuizState('loading');
-    setStatusMessage(`🤖 AI đang phân tích toàn bộ ${slides.length} slide PDF để sinh ${numQuestions} câu Quiz...`);
+    setStatusMessage(`🤖 AI đang phân tích toàn bộ ${slides.length} slide PDF để sinh ${countToGenerate} câu Quiz...`);
 
     try {
       const result = await generateQuizFromFullPdf({
         slides,
-        numQuestions
+        numQuestions: countToGenerate
       });
 
       if (result && result.quizzes && result.quizzes.length > 0) {
@@ -391,7 +417,7 @@ function App() {
 
           <div className="tutor-content">
             
-            {/* TAB 1: TUTOR CHATBOT WITH RAG RETRIEVAL & CLICKABLE MULTI-SOURCES */}
+            {/* TAB 1: TUTOR CHATBOT WITH SMART INTENT & METADATA RANGE RETRIEVAL */}
             {activeRightTab === 'chat' && (
               <>
                 {chatMessages.map((msg, i) => (
@@ -405,9 +431,14 @@ function App() {
                       <div className="tutor-card">
                         <div style={{display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, fontSize: '0.8rem', color: 'var(--primary)'}}>
                           <span>🤖 AI Tutor</span>
+                          {msg.intent === 'SUMMARY' && (
+                            <span style={{fontSize: '0.7rem', background: '#eff6ff', color: '#1d4ed8', padding: '0.1rem 0.5rem', borderRadius: '10px', fontWeight: 700}}>
+                              📑 BẢN TÓM TẮT
+                            </span>
+                          )}
                         </div>
 
-                        <div className="tutor-quote-text">
+                        <div className="tutor-quote-text" style={{whiteSpace: 'pre-wrap'}}>
                           {msg.text}
                         </div>
 
@@ -415,10 +446,10 @@ function App() {
                         {msg.sources && msg.sources.length > 0 && (
                           <div className="tutor-sources-box">
                             <div className="tutor-sources-title">
-                              📚 Sources ({msg.sources.length} nguồn trích dẫn từ PDF)
+                              📚 Sources ({msg.sources.length} slide trích dẫn từ PDF)
                             </div>
                             <div className="tutor-sources-list">
-                              {msg.sources.map((src, sIdx) => {
+                              {msg.sources.slice(0, 15).map((src, sIdx) => {
                                 const dayText = src.dayTitle || (src.dayId === 'day1' ? 'Day 1' : 'Day 2');
                                 return (
                                   <button
@@ -431,11 +462,15 @@ function App() {
                                   </button>
                                 );
                               })}
+                              {msg.sources.length > 15 && (
+                                <span style={{fontSize: '0.75rem', color: 'var(--text-sub)', alignSelf: 'center'}}>
+                                  ... và thêm {msg.sources.length - 15} slide khác
+                                </span>
+                              )}
                             </div>
                           </div>
                         )}
 
-                        {/* NÚT SHORTCUT [📝 Làm Quiz] TỰ ĐỘNG CHUYỂN SANG TAB QUIZ */}
                         <button 
                           className="btn-quiz-shortcut"
                           onClick={() => setActiveRightTab('quiz')}
@@ -451,7 +486,7 @@ function App() {
                   <div className="tutor-card" style={{alignItems: 'center', padding: '1.5rem'}}>
                     <div className="spinner-small"></div>
                     <span style={{fontSize: '0.8rem', color: 'var(--text-sub)', marginTop: '0.5rem'}}>
-                      AI đang tra cứu tài liệu PDF & tổng hợp câu trả lời...
+                      AI đang phân tích & tổng hợp tài liệu PDF...
                     </span>
                   </div>
                 )}
@@ -608,7 +643,7 @@ function App() {
             <div className="tutor-input-wrapper">
               <input 
                 type="text" 
-                placeholder="Nhập câu hỏi tra cứu tài liệu PDF..." 
+                placeholder="Nhập câu hỏi ('LLM là gì?') hoặc yêu cầu tóm tắt ('Tóm tắt Day 1')..." 
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 disabled={isChatLoading}

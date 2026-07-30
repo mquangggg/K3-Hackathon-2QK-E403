@@ -1,6 +1,8 @@
 /**
- * Service gọi Google Gemini API chính thức (gemini-2.5-flash) cho AI Quiz Generator & AI Tutor Chatbot
+ * Service gọi Google Gemini API chính thức cho AI Quiz Generator & AI Tutor Chatbot
  */
+
+export const DEFAULT_GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL || "gemini-2.5-flash";
 
 export const SYSTEM_PROMPT = `
 Bạn là "VLearn AI Quiz Generator" - Trợ lý trí tuệ nhân tạo chuyên tạo các câu hỏi trắc nghiệm kiểm tra hiểu bài (Active Understanding Check) dựa trên tài liệu bài giảng PDF.
@@ -21,8 +23,8 @@ Cấu trúc JSON đầu ra bắt buộc:
       "question": "Câu hỏi trắc nghiệm ngắn gọn, kiểm tra đúng khái niệm trong tài liệu",
       "options": ["Phương án A", "Phương án B", "Phương án C", "Phương án D"],
       "correct_answer": "Phương án B",
-      "correctIndex": 1, // Chỉ số 0, 1, 2, hoặc 3 của đáp án đúng trong mảng options
-      "source_slide": 5, // Số slide (ví dụ 5 đại diện cho Slide 5)
+      "correctIndex": 1,
+      "source_slide": 5,
       "explanation": "Giải thích chi tiết ngắn gọn tại sao đáp án này đúng."
     }
   ]
@@ -35,7 +37,7 @@ Quy tắc Guardrails nghiêm ngặt:
 - [Phương án sai hợp lý]: Các đáp án nhiễu phải hợp lý nhưng không gây mơ hồ. Chỉ có đúng 1 đáp án đúng.
 `;
 
-export const CHATBOT_SYSTEM_PROMPT = `
+export const CHATBOT_QA_SYSTEM_PROMPT = `
 You are an AI Tutor that answers questions strictly based on the provided learning materials.
 
 RULES FOR THE AI TUTOR:
@@ -55,11 +57,33 @@ OUTPUT FORMAT MUST BE VALID JSON ONLY:
 }
 `;
 
+export const CHATBOT_SUMMARY_SYSTEM_PROMPT = `
+You are an AI Tutor summarizing learning materials for a student.
+
+SUMMARY INSTRUCTIONS:
+1. You are provided with ALL slides in the requested scope (e.g. Day 1 from Slide 1 to Slide N).
+2. Synthesize a structured, clear, and comprehensive summary covering all core concepts, key topics, and main takeaways from ALL the provided slides in chronological order.
+3. Use Markdown formatting (headers, bullet points, bold key terms) to make the summary easy to read.
+4. Do NOT invent facts or hallucinate content not present in the provided slides.
+5. Include ALL slide numbers present in the provided context in the "used_sources" array.
+
+OUTPUT FORMAT MUST BE VALID JSON ONLY:
+{
+  "status": "SUCCESS",
+  "answer": "### 📌 Tổng Quan Bài Giảng...\n...",
+  "used_sources": [
+    { "dayId": "day1", "dayTitle": "Day 1", "slide": 1 },
+    { "dayId": "day1", "dayTitle": "Day 1", "slide": 2 }
+  ]
+}
+`;
+
 /**
  * Sinh Quiz từ toàn bộ mảng Slide PDF
  */
-export async function generateQuizFromFullPdf({ slides = [], numQuestions = 5, apiKey = "" }) {
+export async function generateQuizFromFullPdf({ slides = [], numQuestions = 5, apiKey = "", model = "" }) {
   const GEMINI_KEY = apiKey || import.meta.env.VITE_GEMINI_API_KEY || "";
+  const GEMINI_MODEL = model || import.meta.env.VITE_GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
 
   if (!GEMINI_KEY) {
     throw new Error("Chưa cấu hình GEMINI_API_KEY trong file .env!");
@@ -87,7 +111,7 @@ Hãy phân tích tài liệu trên và sinh ĐÚNG ${numQuestions} câu hỏi tr
 `;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
     
     const response = await fetch(url, {
       method: "POST",
@@ -123,22 +147,22 @@ Hãy phân tích tài liệu trên và sinh ĐÚNG ${numQuestions} câu hỏi tr
 
     return JSON.parse(rawText);
   } catch (error) {
-    console.error("Lỗi Gemini API:", error);
+    console.error(`Lỗi Gemini API (Model: ${GEMINI_MODEL}):`, error);
     throw error;
   }
 }
 
 /**
- * Gọi AI Tutor Chatbot trả lời câu hỏi dựa trên RAG Context được Retrieve
+ * Gọi AI Tutor Chatbot trả lời câu hỏi (QA) hoặc Tóm tắt bài giảng (SUMMARY)
  */
-export async function askTutorChatbot({ question = "", history = [], retrievedChunks = [], apiKey = "" }) {
+export async function askTutorChatbot({ question = "", intent = "QA", history = [], retrievedChunks = [], apiKey = "", model = "" }) {
   const GEMINI_KEY = apiKey || import.meta.env.VITE_GEMINI_API_KEY || "";
+  const GEMINI_MODEL = model || import.meta.env.VITE_GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
 
   if (!GEMINI_KEY) {
     throw new Error("Chưa cấu hình GEMINI_API_KEY trong file .env!");
   }
 
-  // Nếu không tìm thấy bất kỳ chunk tài liệu nào khớp từ khóa
   if (!retrievedChunks || retrievedChunks.length === 0) {
     return {
       status: "NOT_FOUND",
@@ -147,9 +171,9 @@ export async function askTutorChatbot({ question = "", history = [], retrievedCh
     };
   }
 
-  // Định dạng RAG Context được trích xuất từ PDF cho Gemini
+  // Định dạng RAG Context / Metadata Slide Chunks truyền cho Gemini
   const formattedContext = retrievedChunks.map((chunk, idx) => {
-    return `[CONTEXT CHUNK ${idx + 1}]
+    return `[SLIDE CHUNK ${idx + 1}]
 Tài liệu: ${chunk.dayTitle} (${chunk.fileName})
 Trang: Slide ${chunk.slideNum}
 Tiêu đề: ${chunk.title}
@@ -157,10 +181,29 @@ Nội dung: ${chunk.content}
 Metadata: dayId="${chunk.dayId}", dayTitle="${chunk.dayTitle}", slide=${chunk.slideNum}`;
   }).join('\n\n');
 
-  // Lịch sử hội thoại nhiều lượt
+  // Lấy mảng tất cả used_sources mặc định từ metadata thực tế
+  const actualUsedSources = retrievedChunks.map(c => ({
+    dayId: c.dayId,
+    dayTitle: c.dayTitle,
+    slide: c.slideNum
+  }));
+
+  const systemInstruction = intent === 'SUMMARY' ? CHATBOT_SUMMARY_SYSTEM_PROMPT : CHATBOT_QA_SYSTEM_PROMPT;
   const formattedHistory = history.slice(-4).map(h => `${h.role === 'user' ? 'Học viên' : 'AI Tutor'}: ${h.text}`).join('\n');
 
-  const userPrompt = `
+  const userPrompt = intent === 'SUMMARY' ? `
+DƯỚI ĐÂY LÀ TOÀN BỘ CÁC SLIDE TRONG PHẠM VI CẦN TÓM TẮT (GỒM ${retrievedChunks.length} SLIDES THỰC TẾ):
+
+${formattedContext}
+
+---
+YÊU CẦU TÓM TẮT CỦA HỌC VIÊN:
+"${question}"
+
+YÊU CẦU AI:
+Hãy tổng hợp nội dung toàn bộ các slide trên thành một bản tóm tắt bài giảng chi tiết, logic, rõ ràng theo cấu trúc Markdown.
+Bắt buộc liệt kê đầy đủ tất cả ${retrievedChunks.length} slide đã truyền vào thuộc tính "used_sources".
+` : `
 DƯỚI ĐÂY LÀ CONTEXT ĐƯỢC RETRIEVE TỪ CÁC TÀI LIỆU PDF HỌC TẬP:
 
 ${formattedContext}
@@ -180,7 +223,7 @@ Nếu Context trên không chứa thông tin trả lời, phải trả về stat
 `;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
     
     const response = await fetch(url, {
       method: "POST",
@@ -190,14 +233,14 @@ Nếu Context trên không chứa thông tin trả lời, phải trả về stat
           {
             role: "user",
             parts: [
-              { text: CHATBOT_SYSTEM_PROMPT },
+              { text: systemInstruction },
               { text: userPrompt }
             ]
           }
         ],
         generationConfig: {
           responseMimeType: "application/json",
-          temperature: 0.1
+          temperature: intent === 'SUMMARY' ? 0.2 : 0.1
         }
       })
     });
@@ -214,9 +257,19 @@ Nếu Context trên không chứa thông tin trả lời, phải trả về stat
       throw new Error("Không nhận được phản hồi từ Gemini API.");
     }
 
-    return JSON.parse(rawText);
+    const parsedJSON = JSON.parse(rawText);
+
+    // Nếu AI từ chối trả lời do không tìm thấy trong tài liệu -> Set sources = []
+    if (parsedJSON.status === "NOT_FOUND" || (parsedJSON.answer && parsedJSON.answer.toLowerCase().includes("xin lỗi"))) {
+      parsedJSON.used_sources = [];
+    } else if (!parsedJSON.used_sources || parsedJSON.used_sources.length === 0) {
+      parsedJSON.used_sources = actualUsedSources;
+    }
+
+    return parsedJSON;
+
   } catch (error) {
-    console.error("Lỗi AI Tutor Chatbot:", error);
+    console.error(`Lỗi AI Tutor Chatbot (${intent}) (Model: ${GEMINI_MODEL}):`, error);
     throw error;
   }
 }

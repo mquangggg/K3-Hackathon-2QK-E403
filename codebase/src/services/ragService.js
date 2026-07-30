@@ -11,11 +11,12 @@ export async function indexAllCourseSlides(courseData = []) {
     if (!slidesCache[course.id] && course.pdfUrl) {
       try {
         const parsedSlides = await loadPdfFromUrl(course.pdfUrl, course.fileName);
-        slidesCache[course.id] = parsedSlides.map(slide => ({
+        slidesCache[course.id] = parsedSlides.map((slide, idx) => ({
           dayId: course.id,
+          dayNumber: course.id === 'day1' ? 1 : (course.id === 'day2' ? 2 : 1),
           dayTitle: course.title.split('—')[0].trim(),
           fileName: course.fileName,
-          slideNum: slide.originalPage || slide.pageNum,
+          slideNum: slide.originalPage || (idx + 1),
           title: slide.title,
           content: slide.contentText || (slide.contentLines ? slide.contentLines.join(' ') : slide.title)
         }));
@@ -28,59 +29,184 @@ export async function indexAllCourseSlides(courseData = []) {
 }
 
 /**
- * Tìm kiếm RAG (Retrieval) các slide liên quan nhất đến câu hỏi của học viên
- * @param {string} query - Câu hỏi của học viên
- * @param {Array} currentLoadedSlides - Các slide của bài giảng đang mở
- * @param {Array} courseData - Danh mục tất cả bài giảng
- * @param {number} topK - Số lượng slide liên quan tối đa cần lấy (mặc định 4)
+ * Nhận diện Ý định (Intent Detection) và Phạm vi (Scope Extraction) từ câu hỏi của người dùng
  */
-export async function retrieveRelevantSlides(query = '', currentLoadedSlides = [], courseData = [], topK = 4) {
-  if (!query.trim()) return [];
+export function detectUserIntent(query = '') {
+  const normalizedQuery = query.toLowerCase().trim();
 
-  // Đảm bảo cache bài giảng đã sẵn sàng
+  // 1. Intent = QUIZ
+  if (normalizedQuery.includes('làm quiz') || normalizedQuery.includes('tạo quiz') || normalizedQuery.includes('sinh quiz') || normalizedQuery.includes('test kiến thức')) {
+    let numQuestions = 5; // Mặc định 5 câu
+    const countMatch = normalizedQuery.match(/(\d+)\s*(?:câu|question|quiz)/i) || normalizedQuery.match(/(?:tạo|sinh|làm)\s*(\d+)/i);
+    if (countMatch) {
+      numQuestions = Math.max(1, Math.min(30, parseInt(countMatch[1], 10)));
+    }
+    return { intent: 'QUIZ', numQuestions };
+  }
+
+  // 2. Intent = SUMMARY
+  const summaryKeywords = ['tóm tắt', 'summary', 'tổng hợp', 'nội dung chính', 'tóm lược', 'tổng quan'];
+  const isSummary = summaryKeywords.some(kw => normalizedQuery.includes(kw));
+
+  if (isSummary) {
+    // Xác định số Day (Day 1, Day 2...)
+    let dayNumber = null;
+    let dayId = null;
+    const dayMatch = normalizedQuery.match(/day\s*(\d+)/i) || normalizedQuery.match(/bài\s*(\d+)/i) || normalizedQuery.match(/buổi\s*(\d+)/i);
+    if (dayMatch) {
+      dayNumber = parseInt(dayMatch[1], 10);
+      dayId = `day${dayNumber}`;
+    }
+
+    // Case 4: SUMMARY SLIDE_RANGE (VD: "Tóm tắt Day 1 từ Slide 5 đến Slide 10")
+    const rangeMatch = normalizedQuery.match(/(?:từ|from)\s*(?:slide|trang)?\s*(\d+)\s*(?:đến|tới|to)\s*(?:slide|trang)?\s*(\d+)/i);
+    if (rangeMatch) {
+      const startSlide = parseInt(rangeMatch[1], 10);
+      const endSlide = parseInt(rangeMatch[2], 10);
+      return {
+        intent: 'SUMMARY',
+        scope: 'SLIDE_RANGE',
+        dayNumber: dayNumber || 1,
+        dayId: dayId || 'day1',
+        startSlide: Math.min(startSlide, endSlide),
+        endSlide: Math.max(startSlide, endSlide)
+      };
+    }
+
+    // Case 3: SUMMARY SPECIFIC_SLIDE (VD: "Tóm tắt Slide 10 Day 1")
+    const singleSlideMatch = normalizedQuery.match(/slide\s*(\d+)/i) || normalizedQuery.match(/trang\s*(\d+)/i);
+    if (singleSlideMatch) {
+      const slideNum = parseInt(singleSlideMatch[1], 10);
+      return {
+        intent: 'SUMMARY',
+        scope: 'SPECIFIC_SLIDE',
+        dayNumber: dayNumber || 1,
+        dayId: dayId || 'day1',
+        slideNum
+      };
+    }
+
+    // Case 2: SUMMARY SPECIFIC_DAY (VD: "Tóm tắt Day 1" hoặc "Tóm tắt slide Day 1")
+    if (dayNumber) {
+      return {
+        intent: 'SUMMARY',
+        scope: 'SPECIFIC_DAY',
+        dayNumber,
+        dayId: dayId || 'day1'
+      };
+    }
+
+    // Mặc định tóm tắt bài giảng đang xem nếu không chỉ định Day
+    return {
+      intent: 'SUMMARY',
+      scope: 'SPECIFIC_DAY',
+      dayNumber: 1,
+      dayId: 'day1'
+    };
+  }
+
+  // 3. Intent = QA (Default)
+  return { intent: 'QA' };
+}
+
+/**
+ * Xử lý RAG Retrieval thông minh dựa trên Intent & Scope (Metadata Filtering vs Semantic Top-K Search)
+ */
+export async function processSmartRetrieval(query = '', currentLoadedSlides = [], courseData = []) {
+  const intentResult = detectUserIntent(query);
+
+  if (intentResult.intent === 'QUIZ') {
+    return {
+      intent: 'QUIZ',
+      numQuestions: intentResult.numQuestions || 5,
+      retrievedChunks: []
+    };
+  }
+
+  // Đảm bảo cache toàn bộ slide các bài giảng đã sẵn sàng
   await indexAllCourseSlides(courseData);
 
-  // Tập hợp tất cả các slide từ tất cả bài giảng
-  let allSlideChunks = [];
-  
-  Object.keys(slidesCache).forEach(dayId => {
-    allSlideChunks = allSlideChunks.concat(slidesCache[dayId]);
+  // Tập hợp tất cả slide đã index
+  let allSlides = [];
+  Object.keys(slidesCache).forEach(dId => {
+    allSlides = allSlides.concat(slidesCache[dId]);
   });
 
-  // Nếu cache rỗng, fallback sang mảng slide đang xem
-  if (allSlideChunks.length === 0 && currentLoadedSlides.length > 0) {
-    allSlideChunks = currentLoadedSlides.map(s => ({
+  if (allSlides.length === 0 && currentLoadedSlides.length > 0) {
+    allSlides = currentLoadedSlides.map((s, idx) => ({
       dayId: 'day1',
+      dayNumber: 1,
       dayTitle: 'Day 1',
       fileName: 'd1-slide-hackathon.pdf',
-      slideNum: s.originalPage || s.pageNum,
+      slideNum: s.originalPage || (idx + 1),
       title: s.title,
       content: s.contentText || (s.contentLines ? s.contentLines.join(' ') : s.title)
     }));
   }
 
-  // Tách từ khóa trong câu hỏi
+  // --- XỬ LÝ INTENT = SUMMARY (LỌC TRỰC TIẾP THEO METADATA, KHÔNG DÙNG TOP-K SEMANTIC SEARCH) ---
+  if (intentResult.intent === 'SUMMARY') {
+    const targetDayId = intentResult.dayId || 'day1';
+    let targetDaySlides = allSlides.filter(s => s.dayId === targetDayId);
+
+    // Fallback nếu không lọc được theo dayId
+    if (targetDaySlides.length === 0) {
+      targetDaySlides = allSlides;
+    }
+
+    // Sắp xếp các slide theo thứ tự tăng dần từ 1 đến N
+    targetDaySlides.sort((a, b) => a.slideNum - b.slideNum);
+
+    let filteredChunks = [];
+
+    if (intentResult.scope === 'SPECIFIC_SLIDE') {
+      // Case 3: Chỉ lấy đúng 1 slide
+      filteredChunks = targetDaySlides.filter(s => s.slideNum === intentResult.slideNum);
+      if (filteredChunks.length === 0 && targetDaySlides.length > 0) {
+        filteredChunks = [targetDaySlides[0]];
+      }
+    } else if (intentResult.scope === 'SLIDE_RANGE') {
+      // Case 4: Lấy toàn bộ các slide thuộc khoảng từ start đến end
+      filteredChunks = targetDaySlides.filter(
+        s => s.slideNum >= intentResult.startSlide && s.slideNum <= intentResult.endSlide
+      );
+    } else {
+      // Case 2: SPECIFIC_DAY -> Lấy TOÀN BỘ slide thuộc Day đó (Từ Slide 1 đến Slide N)
+      filteredChunks = targetDaySlides;
+    }
+
+    return {
+      intent: 'SUMMARY',
+      scope: intentResult.scope,
+      requestedDayId: targetDayId,
+      retrievedChunks: filteredChunks
+    };
+  }
+
+  // --- XỬ LÝ INTENT = QA (DÙNG SEMANTIC SEARCH TOP-K RETRIEVAL) ---
   const keywords = query.toLowerCase()
     .replace(/[^\w\sàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/g, ' ')
     .split(/\s+/)
     .filter(k => k.length > 1);
 
-  if (keywords.length === 0) return [];
+  if (keywords.length === 0) {
+    return {
+      intent: 'QA',
+      retrievedChunks: []
+    };
+  }
 
-  // Tính điểm độ liên quan (Relevance Scoring) cho từng slide
-  const scoredSlides = allSlideChunks.map(chunk => {
+  const scoredSlides = allSlides.map(chunk => {
     const textToSearch = `${chunk.title} ${chunk.content}`.toLowerCase();
     let score = 0;
 
     keywords.forEach(kw => {
       if (textToSearch.includes(kw)) {
         score += 2;
-        // Điểm thưởng nếu xuất hiện trong tiêu đề slide
         if (chunk.title.toLowerCase().includes(kw)) score += 3;
       }
     });
 
-    // Điểm thưởng cho khớp cả cụm từ khóa (Phrase match)
     if (textToSearch.includes(query.toLowerCase())) {
       score += 10;
     }
@@ -88,12 +214,14 @@ export async function retrieveRelevantSlides(query = '', currentLoadedSlides = [
     return { chunk, score };
   });
 
-  // Lọc các slide có điểm liên quan > 0 và sắp xếp giảm dần theo điểm
-  const relevantResults = scoredSlides
+  const topKChunks = scoredSlides
     .filter(item => item.score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, topK)
+    .slice(0, 4)
     .map(item => item.chunk);
 
-  return relevantResults;
+  return {
+    intent: 'QA',
+    retrievedChunks: topKChunks
+  };
 }
