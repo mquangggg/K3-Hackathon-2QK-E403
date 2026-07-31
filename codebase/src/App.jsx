@@ -38,10 +38,8 @@ function App() {
   const [chatMessages, setChatMessages] = useState([
     {
       role: 'bot',
-      text: 'Chào bạn! Mình là AI Tutor trợ lý học tập theo ngữ cảnh. Bạn có thể hỏi bất kỳ kiến thức nào ("LLM là gì?") hoặc yêu cầu tóm tắt ("Tóm tắt Day 1", "Tóm tắt Slide 5 đến Slide 10"), mình sẽ tổng hợp chính xác từ PDF bài giảng!',
-      sources: [
-        { dayId: 'day1', dayTitle: 'Day 1', slide: 1 }
-      ]
+      text: 'Chào bạn! Mình là AI Tutor trợ lý học tập theo ngữ cảnh. Bạn có thể hỏi bất kỳ kiến thức nào ("LLM là gì?") hoặc yêu cầu tóm tắt ("Tóm tắt Day 1", "Tóm tắt Slide 5 đến Slide 10", "Tóm tắt slide này"), mình sẽ tổng hợp chính xác từ PDF bài giảng!',
+      sources: []
     }
   ]);
 
@@ -131,7 +129,12 @@ function App() {
 
     try {
       // 1. Phân loại Ý định (Intent) & Retrieval thông minh (QA vs Summary Range)
-      const searchResult = await processSmartRetrieval(userPrompt, slides, courseData);
+      const currentContext = {
+        dayId: activeCourseDay.id,
+        dayNumber: activeCourseDay.id === 'day1' ? 1 : 2,
+        slideNum: currentSlide.originalPage || (activeSlideIndex + 1)
+      };
+      const searchResult = await processSmartRetrieval(userPrompt, slides, courseData, currentContext);
 
       // Nếu Intent == QUIZ -> Chuyển tự động sang tab Flash Quiz & TỰ ĐỘNG SINH QUIZ
       if (searchResult.intent === 'QUIZ') {
@@ -238,7 +241,7 @@ function App() {
         setActiveQuizzes(result.quizzes);
         setQuizState('quiz');
         setIsRealAICall(true);
-        setStatusMessage(`✨ Gemini AI thật đã sinh thành công ${result.quizzes.length} câu Quiz từ toàn bộ tài liệu PDF!`);
+        setStatusMessage(`✨ VLearn Tutor đã sinh thành công ${result.quizzes.length} câu Quiz từ toàn bộ tài liệu PDF!`);
       } else {
         setQuizState('idle');
         setStatusMessage(`⚠️ AI không sinh được bộ Quiz phù hợp từ tài liệu.`);

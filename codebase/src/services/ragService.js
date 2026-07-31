@@ -31,7 +31,7 @@ export async function indexAllCourseSlides(courseData = []) {
 /**
  * Nhận diện Ý định (Intent Detection) và Phạm vi (Scope Extraction) từ câu hỏi của người dùng
  */
-export function detectUserIntent(query = '') {
+export function detectUserIntent(query = '', currentContext = null) {
   const normalizedQuery = query.toLowerCase().trim();
 
   // 1. Intent = QUIZ
@@ -56,6 +56,19 @@ export function detectUserIntent(query = '') {
     if (dayMatch) {
       dayNumber = parseInt(dayMatch[1], 10);
       dayId = `day${dayNumber}`;
+    }
+
+    // Case 0: SUMMARY CURRENT_SLIDE (VD: "tóm tắt slide này", "tóm tắt trang hiện tại")
+    if (normalizedQuery.includes('này') || normalizedQuery.includes('hiện tại') || normalizedQuery.includes('đang xem')) {
+      if (currentContext && currentContext.slideNum) {
+        return {
+          intent: 'SUMMARY',
+          scope: 'SPECIFIC_SLIDE',
+          dayNumber: currentContext.dayNumber || 1,
+          dayId: currentContext.dayId || 'day1',
+          slideNum: currentContext.slideNum
+        };
+      }
     }
 
     // Case 4: SUMMARY SLIDE_RANGE (VD: "Tóm tắt Day 1 từ Slide 5 đến Slide 10")
@@ -112,8 +125,8 @@ export function detectUserIntent(query = '') {
 /**
  * Xử lý RAG Retrieval thông minh dựa trên Intent & Scope (Metadata Filtering vs Semantic Top-K Search)
  */
-export async function processSmartRetrieval(query = '', currentLoadedSlides = [], courseData = []) {
-  const intentResult = detectUserIntent(query);
+export async function processSmartRetrieval(query = '', currentLoadedSlides = [], courseData = [], currentContext = null) {
+  const intentResult = detectUserIntent(query, currentContext);
 
   if (intentResult.intent === 'QUIZ') {
     return {
