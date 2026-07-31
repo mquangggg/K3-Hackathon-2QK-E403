@@ -1,0 +1,1171 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/hwbqtkby",
+    "id": "hwbqtkby",
+    "slide": 2,
+    "layoutId": "/ppt/slideLayouts/slideLayout2.xml",
+    "layoutName": "Slide master 1",
+    "masterLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 960,
+      "height": 540
+    }
+  },
+  "theme": {
+    "colorSchemeName": "Office",
+    "colors": {
+      "accent1": "#4472C4",
+      "accent2": "#ED7D31",
+      "accent3": "#A5A5A5",
+      "accent4": "#FFC000",
+      "accent5": "#5B9BD5",
+      "accent6": "#70AD47",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#44546A",
+      "lt2": "#E7E6E6",
+      "hlink": "#0563C1",
+      "folHlink": "#954F72"
+    },
+    "fontScheme": {
+      "name": "Office",
+      "majorFont": {
+        "latinTypeface": "Calibri Light"
+      },
+      "minorFont": {
+        "latinTypeface": "Calibri"
+      }
+    },
+    "typefaces": [
+      "Calibri",
+      "Calibri Light",
+      "Inter",
+      "Inter Bold",
+      "Petrona Bold"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "/ppt/slideLayouts/slideLayout2.xml",
+      "name": "Slide master 1",
+      "parentLayoutId": "/ppt/slideMasters/slideMaster1.xml",
+      "elements": [
+        {
+          "order": 1,
+          "kind": "image",
+          "scope": "layout",
+          "aid": "template/layout//ppt/slideLayouts/slideLayout2.xml/4",
+          "id": "4",
+          "name": "Image 0",
+          "bbox": [
+            0,
+            0,
+            960,
+            540
+          ],
+          "contentType": "image/jpeg",
+          "asset": {
+            "assetId": "/ppt/media/image-1002-1.jpeg",
+            "contentType": "image/jpeg",
+            "byteLength": 186785
+          },
+          "fillImage": {
+            "assetId": "/ppt/media/image-1002-1.jpeg",
+            "contentType": "image/jpeg",
+            "byteLength": 186785
+          }
+        },
+        {
+          "order": 2,
+          "kind": "shape",
+          "scope": "layout",
+          "aid": "template/layout//ppt/slideLayouts/slideLayout2.xml/3",
+          "id": "3",
+          "name": "Shape 0",
+          "bbox": [
+            0,
+            0,
+            960,
+            540
+          ],
+          "geometry": "rect",
+          "fillColor": "rgba(255, 255, 255, 0.95)"
+        },
+        {
+          "order": 3,
+          "kind": "image",
+          "scope": "layout",
+          "aid": "template/layout//ppt/slideLayouts/slideLayout2.xml/5",
+          "id": "5",
+          "name": "Image 1",
+          "bbox": [
+            842.96,
+            508.61,
+            112.53,
+            26.88
+          ],
+          "contentType": "image/png",
+          "asset": {
+            "assetId": "/ppt/media/image-1002-2.png",
+            "contentType": "image/png",
+            "byteLength": 12803
+          },
+          "fillImage": {
+            "assetId": "/ppt/media/image-1002-2.png",
+            "contentType": "image/png",
+            "byteLength": 12803
+          }
+        }
+      ]
+    },
+    {
+      "scope": "master",
+      "id": "/ppt/slideMasters/slideMaster1.xml",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9072xkry",
+      "id": "2",
+      "name": "Text 0",
+      "bbox": [
+        52.09,
+        105.97,
+        855.83,
+        48.84
+      ],
+      "geometry": "rect",
+      "text": "Vì sao chọn Flash Quiz?",
+      "textPreview": "Vì sao chọn Flash Quiz?",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Vì sao chọn Flash Quiz?"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Vì sao chọn Flash Quiz?",
+          "lineSpacingPercent": 104000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Vì sao chọn Flash Quiz?",
+              "fontSize": 38.67,
+              "typeface": "Petrona Bold",
+              "color": "#000000",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ozy1ofad",
+      "id": "3",
+      "name": "Shape 1",
+      "bbox": [
+        52.09,
+        184.57,
+        855.83,
+        173.19
+      ],
+      "geometry": "roundRect",
+      "lineColor": "rgba(0, 0, 0, 0.08)",
+      "lineWidth": 0.5
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/b29kza94",
+      "id": "4",
+      "name": "Shape 2",
+      "bbox": [
+        52.09,
+        227.99,
+        855.83,
+        0.93
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(0, 0, 0, 0.08)"
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/a10jqpsj",
+      "id": "5",
+      "name": "Shape 3",
+      "bbox": [
+        52.09,
+        271.16,
+        855.83,
+        0.93
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(0, 0, 0, 0.08)"
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/x4r21kru",
+      "id": "6",
+      "name": "Shape 4",
+      "bbox": [
+        52.09,
+        314.34,
+        855.83,
+        0.93
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(0, 0, 0, 0.08)"
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/w3i1sfa9",
+      "id": "7",
+      "name": "Shape 5",
+      "bbox": [
+        266.3,
+        184.57,
+        0.93,
+        173.19
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(0, 0, 0, 0.08)"
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/r65knqtk",
+      "id": "8",
+      "name": "Shape 6",
+      "bbox": [
+        693.71,
+        184.57,
+        0.93,
+        173.19
+      ],
+      "geometry": "rect",
+      "fillColor": "rgba(0, 0, 0, 0.08)"
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/q5wjelsz",
+      "id": "9",
+      "name": "Text 7",
+      "bbox": [
+        67.48,
+        194.5,
+        231.69,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Giải pháp",
+      "textPreview": "Giải pháp",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Giải pháp"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Giải pháp",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Giải pháp",
+              "fontSize": 14.67,
+              "typeface": "Inter Bold",
+              "color": "#272525",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ove9o7yd",
+      "id": "10",
+      "name": "Text 8",
+      "bbox": [
+        281.43,
+        194.5,
+        445.15,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Nhận định",
+      "textPreview": "Nhận định",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Nhận định"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Nhận định",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Nhận định",
+              "fontSize": 14.67,
+              "typeface": "Inter Bold",
+              "color": "#272525",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 10,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/9wnqhczy",
+      "id": "11",
+      "name": "Text 9",
+      "bbox": [
+        708.84,
+        194.5,
+        231.69,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Quyết định",
+      "textPreview": "Quyết định",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Quyết định"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Quyết định",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Quyết định",
+              "fontSize": 14.67,
+              "typeface": "Inter Bold",
+              "color": "#272525",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 11,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/mtwrmxg7",
+      "id": "12",
+      "name": "Text 10",
+      "bbox": [
+        67.48,
+        237.67,
+        231.69,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Tóm tắt bài học",
+      "textPreview": "Tóm tắt bài học",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Tóm tắt bài học"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Tóm tắt bài học",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Tóm tắt bài học",
+              "fontSize": 14.67,
+              "typeface": "Inter",
+              "color": "#272525"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 12,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/nu58f2hs",
+      "id": "13",
+      "name": "Text 11",
+      "bbox": [
+        281.43,
+        237.67,
+        445.15,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Nhanh nhưng vẫn là học thụ động",
+      "textPreview": "Nhanh nhưng vẫn là học thụ động",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Nhanh nhưng vẫn là học thụ động"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Nhanh nhưng vẫn là học thụ động",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Nhanh nhưng vẫn là học thụ động",
+              "fontSize": 14.67,
+              "typeface": "Inter",
+              "color": "#272525"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 13,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/wjy9sry9",
+      "id": "14",
+      "name": "Text 12",
+      "bbox": [
+        708.84,
+        237.67,
+        231.69,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Không chọn",
+      "textPreview": "Không chọn",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Không chọn"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Không chọn",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Không chọn",
+              "fontSize": 14.67,
+              "typeface": "Inter",
+              "color": "#272525"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 14,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/xk7qlczu",
+      "id": "15",
+      "name": "Text 13",
+      "bbox": [
+        67.48,
+        280.84,
+        231.69,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Nhắc lịch học",
+      "textPreview": "Nhắc lịch học",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Nhắc lịch học"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Nhắc lịch học",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Nhắc lịch học",
+              "fontSize": 14.67,
+              "typeface": "Inter",
+              "color": "#272525"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 15,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ahwrqhgj",
+      "id": "16",
+      "name": "Text 14",
+      "bbox": [
+        281.43,
+        280.84,
+        445.15,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Không giải quyết việc hiểu bài",
+      "textPreview": "Không giải quyết việc hiểu bài",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Không giải quyết việc hiểu bài"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Không giải quyết việc hiểu bài",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Không giải quyết việc hiểu bài",
+              "fontSize": 14.67,
+              "typeface": "Inter",
+              "color": "#272525"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 16,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/bip8jmho",
+      "id": "17",
+      "name": "Text 15",
+      "bbox": [
+        708.84,
+        280.84,
+        231.69,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Không chọn",
+      "textPreview": "Không chọn",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Không chọn"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Không chọn",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Không chọn",
+              "fontSize": 14.67,
+              "typeface": "Inter",
+              "color": "#272525"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 17,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/cnupgny5",
+      "id": "18",
+      "name": "Text 16",
+      "bbox": [
+        67.48,
+        324.02,
+        231.69,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Flash Quiz",
+      "textPreview": "Flash Quiz",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Flash Quiz"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Flash Quiz",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Flash Quiz",
+              "fontSize": 14.67,
+              "typeface": "Inter Bold",
+              "color": "#272525",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 18,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/do3q9szq",
+      "id": "19",
+      "name": "Text 17",
+      "bbox": [
+        281.43,
+        324.02,
+        445.15,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Buộc người học nhớ lại và trả lời",
+      "textPreview": "Buộc người học nhớ lại và trả lời",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Buộc người học nhớ lại và trả lời"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Buộc người học nhớ lại và trả lời",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Buộc người học nhớ lại và trả lời",
+              "fontSize": 14.67,
+              "typeface": "Inter",
+              "color": "#272525"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 19,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/t8byxkn2",
+      "id": "20",
+      "name": "Text 18",
+      "bbox": [
+        708.84,
+        324.02,
+        231.69,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Chọn",
+      "textPreview": "Chọn",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Chọn"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Chọn",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Chọn",
+              "fontSize": 14.67,
+              "typeface": "Inter Bold",
+              "color": "#272525",
+              "bold": true
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/s72xofmh",
+      "id": "21",
+      "name": "Shape 19",
+      "bbox": [
+        52.09,
+        374.5,
+        855.83,
+        59.52
+      ],
+      "geometry": "roundRect",
+      "fillColor": "#CCEEFF"
+    },
+    {
+      "order": 21,
+      "kind": "image",
+      "scope": "slide",
+      "aid": "im/ypcfi5kf",
+      "id": "24",
+      "name": "Image 0",
+      "bbox": [
+        66.97,
+        395.58,
+        18.6,
+        14.88
+      ],
+      "contentType": "image/png",
+      "asset": {
+        "assetId": "/ppt/media/image-2-1.png",
+        "contentType": "image/png",
+        "byteLength": 580
+      },
+      "fillImage": {
+        "assetId": "/ppt/media/image-2-1.png",
+        "contentType": "image/png",
+        "byteLength": 580
+      }
+    },
+    {
+      "order": 22,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/65kfmpor",
+      "id": "23",
+      "name": "Text 20",
+      "bbox": [
+        100.45,
+        393.1,
+        840.58,
+        23.81
+      ],
+      "geometry": "rect",
+      "text": "Mục tiêu: giúp học viên biết mình đã hiểu đến đâu chỉ trong khoảng 1 phút.",
+      "textPreview": "Mục tiêu: giúp học viên biết mình đã hiểu đến đâu chỉ trong khoảng 1 phút.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "anchor": 1,
+        "fontSize": 24,
+        "typeface": "Calibri",
+        "color": "tx1",
+        "alignment": "left",
+        "verticalAlignment": "top",
+        "wrap": "none",
+        "insets": {
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Mục tiêu: giúp học viên biết mình đã hiểu đến đâu chỉ trong khoảng 1 phút."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Mục tiêu: giúp học viên biết mình đã hiểu đến đâu chỉ trong khoảng 1 phút.",
+          "lineSpacingPercent": 133000,
+          "resolvedTextStyle": {
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Mục tiêu:",
+              "fontSize": 14.67,
+              "typeface": "Inter Bold",
+              "color": "#000000",
+              "bold": true
+            },
+            {
+              "index": 2,
+              "text": " giúp học viên biết mình đã hiểu đến đâu chỉ trong khoảng ",
+              "fontSize": 14.67,
+              "typeface": "Inter",
+              "color": "#000000"
+            },
+            {
+              "index": 3,
+              "text": "1 phút",
+              "fontSize": 14.67,
+              "typeface": "Inter Bold",
+              "color": "#000000",
+              "bold": true
+            },
+            {
+              "index": 4,
+              "text": ".",
+              "fontSize": 14.67,
+              "typeface": "Inter",
+              "color": "#000000"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ]
+    }
+  ],
+  "composeRuns": []
+}
